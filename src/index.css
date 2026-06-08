@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Montserrat", system-ui, sans-serif;
+  --font-display: "Montserrat Alternates", "Montserrat", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-brand-brown: #4A3E3E;
+  --color-brand-sage: #A4907C;
+  --color-brand-coral: #F1DEC9;
+  --color-brand-sand: #E6D5B8;
+  --color-brand-cream: #FDFBF7;
+}
+
+body {
+  background-color: #FDFBF7 !important;
+  color: #4A3E3E !important;
+}
+
+@layer utilities {
+  .no-print {
+    @media print {
+      display: none !important;
+    }
+  }
+}
+

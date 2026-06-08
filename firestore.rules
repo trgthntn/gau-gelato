@@ -1,0 +1,230 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Safety Net (Default-Deny Catch-All)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+
+    // --- Validation Blueprints ---
+
+    function isValidBranch(b) {
+      return b.id is string && b.id.size() <= 100 &&
+             b.name is string && b.name.size() <= 200 &&
+             b.companyName is string && b.companyName.size() <= 200 &&
+             b.mst is string && b.mst.size() <= 50 &&
+             b.address is string && b.address.size() <= 300 &&
+             b.email is string && b.email.size() <= 100 &&
+             b.bankName is string && b.bankName.size() <= 100 &&
+             b.bankAccount is string && b.bankAccount.size() <= 50 &&
+             b.bankHolder is string && b.bankHolder.size() <= 100;
+    }
+
+    function isValidStaff(s) {
+      return s.id is string && s.id.size() <= 100 &&
+             s.name is string && s.name.size() <= 100 &&
+             s.cccd is string && s.cccd.size() <= 50 &&
+             s.phone is string && s.phone.size() <= 20 &&
+             s.startDate is string &&
+             s.gender in ['male', 'female', 'other'] &&
+             s.address is string && s.address.size() <= 200 &&
+             s.role in ['admin', 'staff'] &&
+             s.branchId is string && s.branchId.size() <= 100 &&
+             s.pin is string && s.pin.size() <= 20;
+    }
+
+    function isValidFlavor(f) {
+      return f.id is string && f.id.size() <= 100 &&
+             f.nameVi is string && f.nameVi.size() <= 100 &&
+             f.nameEn is string && f.nameEn.size() <= 100 &&
+             f.color is string && f.color.size() <= 50 &&
+             f.iconType is string && f.iconType.size() <= 50 &&
+             f.descVi is string && f.descVi.size() <= 1000 &&
+             f.descEn is string && f.descEn.size() <= 1000 &&
+             f.stockGrams is number && f.stockGrams >= 0 &&
+             f.costPerKg is number && f.costPerKg >= 0;
+    }
+
+    function isValidTopping(t) {
+      return t.id is string && t.id.size() <= 100 &&
+             t.nameVi is string && t.nameVi.size() <= 100 &&
+             t.nameEn is string && t.nameEn.size() <= 100 &&
+             t.price is number && t.price >= 0 &&
+             t.stockQuantity is number && t.stockQuantity >= 0;
+    }
+
+    function isValidAccompaniment(a) {
+      return a.id is string && a.id.size() <= 100 &&
+             a.nameVi is string && a.nameVi.size() <= 100 &&
+             a.nameEn is string && a.nameEn.size() <= 100 &&
+             a.price is number && a.price >= 0 &&
+             a.stockQuantity is number && a.stockQuantity >= 0;
+    }
+
+    function isValidVoucher(v) {
+      return v.code is string && v.code.size() <= 50 &&
+             v.campaignVi is string && v.campaignVi.size() <= 200 &&
+             v.campaignEn is string && v.campaignEn.size() <= 200 &&
+             v.discountType in ['percent', 'fixed'] &&
+             v.value is number && v.value >= 0 &&
+             v.minOrder is number && v.minOrder >= 0 &&
+             v.expiryDate is string &&
+             v.usageCount is number && v.usageCount >= 0;
+    }
+
+    function isValidMember(m) {
+      return m.phone is string && m.phone.size() <= 20 &&
+             m.name is string && m.name.size() <= 100 &&
+             m.gender in ['male', 'female', 'other'] &&
+             m.points is number && m.points >= 0 &&
+             m.exchangeHistory is list;
+    }
+
+    function isValidOrder(o) {
+      return o.id is string && o.id.size() <= 100 &&
+             o.branchId is string && o.branchId.size() <= 100 &&
+             o.staffId is string && o.staffId.size() <= 100 &&
+             o.staffName is string && o.staffName.size() <= 100 &&
+             o.date is string &&
+             o.items is list &&
+             o.subtotal is number && o.subtotal >= 0 &&
+             o.taxRate is number && o.taxRate >= 0 &&
+             o.taxAmount is number && o.taxAmount >= 0 &&
+             o.discountAmount is number && o.discountAmount >= 0 &&
+             o.total is number && o.total >= 0 &&
+             o.paymentMethod in ['cash', 'qr'] &&
+             o.invoiceStatus is string;
+    }
+
+    function isValidExpense(e) {
+      return e.id is string && e.id.size() <= 100 &&
+             e.date is string &&
+             e.category is string && e.category.size() <= 100 &&
+             e.amount is number && e.amount >= 0 &&
+             e.descriptionVi is string && e.descriptionVi.size() <= 500 &&
+             e.descriptionEn is string && e.descriptionEn.size() <= 500 &&
+             e.branchId is string && e.branchId.size() <= 100;
+    }
+
+    function isValidAuditLog(al) {
+      return al.id is string && al.id.size() <= 100 &&
+             al.timestamp is string &&
+             al.staffId is string && al.staffId.size() <= 100 &&
+             al.staffName is string && al.staffName.size() <= 100 &&
+             al.branchId is string && al.branchId.size() <= 100 &&
+             al.branchName is string && al.branchName.size() <= 100 &&
+             al.actionVi is string && al.actionVi.size() <= 500 &&
+             al.actionEn is string && al.actionEn.size() <= 500 &&
+             al.details is string;
+    }
+
+    function isValidInventoryLog(il) {
+      return il.id is string && il.id.size() <= 100 &&
+             il.timestamp is string &&
+             il.branchId is string && il.branchId.size() <= 100 &&
+             il.itemId is string && il.itemId.size() <= 100 &&
+             il.itemType in ['flavor', 'topping', 'accompaniment'] &&
+             il.changeAmount is number &&
+             il.reasonVi is string && il.reasonVi.size() <= 500 &&
+             il.reasonEn is string && il.reasonEn.size() <= 500 &&
+             il.staffName is string && il.staffName.size() <= 100;
+    }
+
+    function isValidBranchStock(bs) {
+      return bs.branchId is string && bs.branchId.size() <= 100 &&
+             bs.stocks is map;
+    }
+
+    // --- Core Database Rules ---
+
+    // 1. Branches
+    match /branches/{branchId} {
+      allow read: if true;
+      allow create, update: if isValidId(branchId) && isValidBranch(request.resource.data);
+      allow delete: if true;
+    }
+
+    // 2. Staff
+    match /staff/{staffId} {
+      allow read: if true;
+      allow create, update: if isValidId(staffId) && isValidStaff(request.resource.data);
+      allow delete: if true;
+    }
+
+    // 3. Flavors
+    match /flavors/{flavorId} {
+      allow read: if true;
+      allow create, update: if isValidId(flavorId) && isValidFlavor(request.resource.data);
+      allow delete: if true;
+    }
+
+    // 4. Toppings
+    match /toppings/{toppingId} {
+      allow read: if true;
+      allow create, update: if isValidId(toppingId) && isValidTopping(request.resource.data);
+      allow delete: if true;
+    }
+
+    // 5. Accompaniments
+    match /accompaniments/{accompanimentId} {
+      allow read: if true;
+      allow create, update: if isValidId(accompanimentId) && isValidAccompaniment(request.resource.data);
+      allow delete: if true;
+    }
+
+    // 6. Vouchers
+    match /vouchers/{voucherCode} {
+      allow read: if true;
+      allow create, update: if isValidId(voucherCode) && isValidVoucher(request.resource.data);
+      allow delete: if true;
+    }
+
+    // 7. Loyalty Members
+    match /members/{phone} {
+      allow read: if true;
+      allow create, update: if isValidId(phone) && isValidMember(request.resource.data);
+      allow delete: if true;
+    }
+
+    // 8. Orders
+    match /orders/{orderId} {
+      allow read: if true;
+      allow create, update: if isValidId(orderId) && isValidOrder(request.resource.data);
+      allow delete: if true;
+    }
+
+    // 9. Operational Expenses
+    match /expenses/{expenseId} {
+      allow read: if true;
+      allow create, update: if isValidId(expenseId) && isValidExpense(request.resource.data);
+      allow delete: if true;
+    }
+
+    // 10. Audit Logs
+    match /auditLogs/{logId} {
+      allow read: if true;
+      allow create: if isValidId(logId) && isValidAuditLog(request.resource.data);
+      allow update, delete: if false; // Audit logs must be immutable
+    }
+
+    // 11. Inventory Logs
+    match /inventoryLogs/{logId} {
+      allow read: if true;
+      allow create: if isValidId(logId) && isValidInventoryLog(request.resource.data);
+      allow update, delete: if false; // Logs must be immutable
+    }
+
+    // 12. Branch Stocks
+    match /branchStocks/{branchId} {
+      allow read: if true;
+      allow create, update: if isValidId(branchId) && isValidBranchStock(request.resource.data);
+      allow delete: if true;
+    }
+  }
+}

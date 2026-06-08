@@ -1,0 +1,247 @@
+{
+  "entities": {
+    "Branch": {
+      "title": "Branch",
+      "description": "Information about an ice cream branch",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "companyName": { "type": "string" },
+        "mst": { "type": "string" },
+        "address": { "type": "string" },
+        "email": { "type": "string" },
+        "bankName": { "type": "string" },
+        "bankAccount": { "type": "string" },
+        "bankHolder": { "type": "string" },
+        "vietQrUrl": { "type": "string" }
+      },
+      "required": ["id", "name", "companyName", "mst", "address", "email", "bankName", "bankAccount", "bankHolder"]
+    },
+    "Staff": {
+      "title": "Staff",
+      "description": "Employee working at a branch",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "cccd": { "type": "string" },
+        "phone": { "type": "string" },
+        "startDate": { "type": "string" },
+        "gender": { "type": "string", "enum": ["male", "female", "other"] },
+        "address": { "type": "string" },
+        "notes": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "staff"] },
+        "branchId": { "type": "string" },
+        "pin": { "type": "string" }
+      },
+      "required": ["id", "name", "cccd", "phone", "startDate", "gender", "address", "role", "branchId", "pin"]
+    },
+    "Flavor": {
+      "title": "Flavor",
+      "description": "An ice cream flavor profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nameVi": { "type": "string" },
+        "nameEn": { "type": "string" },
+        "color": { "type": "string" },
+        "iconType": { "type": "string" },
+        "descVi": { "type": "string" },
+        "descEn": { "type": "string" },
+        "stockGrams": { "type": "number" },
+        "costPerKg": { "type": "number" }
+      },
+      "required": ["id", "nameVi", "nameEn", "color", "iconType", "descVi", "descEn", "stockGrams", "costPerKg"]
+    },
+    "Topping": {
+      "title": "Topping",
+      "description": "An ice cream retail or add-on topping",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nameVi": { "type": "string" },
+        "nameEn": { "type": "string" },
+        "price": { "type": "number" },
+        "stockQuantity": { "type": "number" }
+      },
+      "required": ["id", "nameVi", "nameEn", "price", "stockQuantity"]
+    },
+    "Accompaniment": {
+      "title": "Accompaniment",
+      "description": "Accompaniment retail or add-on like corn, cups",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nameVi": { "type": "string" },
+        "nameEn": { "type": "string" },
+        "price": { "type": "number" },
+        "stockQuantity": { "type": "number" }
+      },
+      "required": ["id", "nameVi", "nameEn", "price", "stockQuantity"]
+    },
+    "Voucher": {
+      "title": "Voucher",
+      "description": "Voucher or gift card parameters",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "campaignVi": { "type": "string" },
+        "campaignEn": { "type": "string" },
+        "discountType": { "type": "string", "enum": ["percent", "fixed"] },
+        "value": { "type": "number" },
+        "minOrder": { "type": "number" },
+        "expiryDate": { "type": "string" },
+        "usageCount": { "type": "number" }
+      },
+      "required": ["code", "campaignVi", "campaignEn", "discountType", "value", "minOrder", "expiryDate", "usageCount"]
+    },
+    "LoyaltyMember": {
+      "title": "LoyaltyMember",
+      "description": "A customer who registers with a loyalty points account",
+      "type": "object",
+      "properties": {
+        "phone": { "type": "string" },
+        "name": { "type": "string" },
+        "gender": { "type": "string", "enum": ["male", "female", "other"] },
+        "points": { "type": "number" },
+        "exchangeHistory": { "type": "array" }
+      },
+      "required": ["phone", "name", "gender", "points", "exchangeHistory"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Sales order or invoice details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "branchId": { "type": "string" },
+        "staffId": { "type": "string" },
+        "staffName": { "type": "string" },
+        "date": { "type": "string" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "taxRate": { "type": "number" },
+        "taxAmount": { "type": "number" },
+        "discountAmount": { "type": "number" },
+        "voucherCode": { "type": "string" },
+        "total": { "type": "number" },
+        "paymentMethod": { "type": "string", "enum": ["cash", "qr"] },
+        "memberPhone": { "type": "string" },
+        "invoiceStatus": { "type": "string" },
+        "invoiceCode": { "type": "string" },
+        "editHistory": { "type": "array" }
+      },
+      "required": ["id", "branchId", "staffId", "staffName", "date", "items", "subtotal", "taxRate", "taxAmount", "discountAmount", "total", "paymentMethod", "invoiceStatus"]
+    },
+    "OperationalExpense": {
+      "title": "OperationalExpense",
+      "description": "Out-of-pocket overhead or raw materials expenses",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "category": { "type": "string" },
+        "amount": { "type": "number" },
+        "descriptionVi": { "type": "string" },
+        "descriptionEn": { "type": "string" },
+        "branchId": { "type": "string" }
+      },
+      "required": ["id", "date", "category", "amount", "descriptionVi", "descriptionEn", "branchId"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Record of system administrative actions for transparency",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "staffId": { "type": "string" },
+        "staffName": { "type": "string" },
+        "branchId": { "type": "string" },
+        "branchName": { "type": "string" },
+        "actionVi": { "type": "string" },
+        "actionEn": { "type": "string" },
+        "details": { "type": "string" }
+      },
+      "required": ["id", "timestamp", "staffId", "staffName", "branchId", "branchName", "actionVi", "actionEn", "details"]
+    },
+    "InventoryLog": {
+      "title": "InventoryLog",
+      "description": "Record of stock inventory changes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "branchId": { "type": "string" },
+        "itemId": { "type": "string" },
+        "itemType": { "type": "string" },
+        "changeAmount": { "type": "number" },
+        "reasonVi": { "type": "string" },
+        "reasonEn": { "type": "string" },
+        "staffName": { "type": "string" }
+      },
+      "required": ["id", "timestamp", "branchId", "itemId", "itemType", "changeAmount", "reasonVi", "reasonEn", "staffName"]
+    },
+    "BranchStock": {
+      "title": "BranchStock",
+      "description": "Record of in-store flavor and material quantities for a branch",
+      "type": "object",
+      "properties": {
+        "branchId": { "type": "string" },
+        "stocks": { "type": "object" }
+      },
+      "required": ["branchId", "stocks"]
+    }
+  },
+  "firestore": {
+    "/branches/{branchId}": {
+      "schema": "Branch",
+      "description": "List of store branches managed in the app"
+    },
+    "/staff/{staffId}": {
+      "schema": "Staff",
+      "description": "List of staff members"
+    },
+    "/flavors/{flavorId}": {
+      "schema": "Flavor",
+      "description": "List of gelato flavors and inventory information"
+    },
+    "/toppings/{toppingId}": {
+      "schema": "Topping",
+      "description": "Ice cream toppings list"
+    },
+    "/accompaniments/{accompanimentId}": {
+      "schema": "Accompaniment",
+      "description": "Ice cream accompaniments list"
+    },
+    "/vouchers/{voucherCode}": {
+      "schema": "Voucher",
+      "description": "Stores marketing voucher campaign details"
+    },
+    "/members/{phone}": {
+      "schema": "LoyaltyMember",
+      "description": "Stores loyalty member customer details"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Stores transaction sales orders"
+    },
+    "/expenses/{expenseId}": {
+      "schema": "OperationalExpense",
+      "description": "Stores company operational expenses"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Security audit log history for all operations"
+    },
+    "/inventoryLogs/{logId}": {
+      "schema": "InventoryLog",
+      "description": "Logs detailing stock changes"
+    },
+    "/branchStocks/{branchId}": {
+      "schema": "BranchStock",
+      "description": "Stores nested quantities mapping items to current quantities"
+    }
+  }
+}

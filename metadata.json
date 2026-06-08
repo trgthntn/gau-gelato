@@ -1,0 +1,6 @@
+{
+  "name": "Gấu Gelato POS",
+  "description": "Hệ thống quản trị bán hàng đa chi nhánh Gấu Gelato, hỗ trợ bán theo set, gram, hóa đơn điện tử VAT, thẻ thành viên Zalo, quản lý kho & doanh thu tức thì.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
