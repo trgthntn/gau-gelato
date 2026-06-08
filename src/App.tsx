@@ -2193,7 +2193,7 @@ export default function App() {
                           </div>
 
                           {/* Grid with larger, highly visible flavor cards */}
-                          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5">
                             {flavors.filter(fl => !fl.disabled).map((fl) => (
                               <button
                                 key={fl.id}
@@ -2202,12 +2202,12 @@ export default function App() {
                                   nextFl[idxSlot] = fl.id;
                                   setScoopFlavors(nextFl);
                                 }}
-                                className={`p-3.5 border rounded-2xl flex flex-col justify-center items-center gap-2.5 transition h-28 select-none cursor-pointer ${scoopFlavors[idxSlot] === fl.id ? 'ring-3 ring-amber-800 scale-102 border-transparent bg-amber-50/20' : 'border-[#4A3E3E]/10 hover:bg-white bg-[#FDFBF7]/40 hover:border-amber-700/50 hover:shadow-xs'}`}
+                                className={`p-3 border rounded-2xl flex flex-col justify-between items-center gap-2 transition h-34 select-none cursor-pointer ${scoopFlavors[idxSlot] === fl.id ? 'ring-3 ring-amber-800 scale-102 border-transparent bg-amber-50/20' : 'border-[#4A3E3E]/10 hover:bg-white bg-[#FDFBF7]/40 hover:border-amber-700/50 hover:shadow-xs'}`}
                               >
                                 {fl.image ? (
-                                  <img src={fl.image} referrerPolicy="no-referrer" className="w-24 h-12 rounded-xl object-cover border shadow-2xs shrink-0" alt={fl.nameVi} />
+                                  <img src={fl.image} referrerPolicy="no-referrer" className="w-full h-16 rounded-xl object-contain border border-stone-200/50 shadow-2xs shrink-0" alt={fl.nameVi} />
                                 ) : (
-                                  <div className="w-24 h-12 flex items-center justify-center pointer-events-none shrink-0" dangerouslySetInnerHTML={{ __html: getFlavorSvg(fl.iconType || 'creamy', fl.color || '#FFAEBC') }} />
+                                  <div className="w-28 h-14 flex items-center justify-center pointer-events-none shrink-0" dangerouslySetInnerHTML={{ __html: getFlavorSvg(fl.iconType || 'creamy', fl.color || '#FFAEBC') }} />
                                 )}
                                 <span className="text-[10.5px] font-black tracking-tight text-center truncate w-full block text-stone-800 leading-tight">
                                   {isVi ? fl.nameVi : fl.nameEn}
