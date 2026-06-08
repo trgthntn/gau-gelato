@@ -38,7 +38,7 @@ export const LOCALES: Record<Language, Record<string, string>> = {
     // Sales Mode Headers
     modeSet: 'Bán theo Set Viên',
     modeWeight: 'Bán theo Gram & Mix vị',
-    modeAccompaniment: 'Món ăn kèm & Topping',
+    modeAccompaniment: 'Món kèm & Topping',
     addToCart: 'Thêm vào Giỏ hàng',
     customSetBuilder: 'Tùy chỉnh Set viên mới',
     scoppCount: 'Set {count} viên',
@@ -49,7 +49,7 @@ export const LOCALES: Record<Language, Record<string, string>> = {
     inputWeight: 'Nhập trọng lượng (g)',
     mixFlavorHelp: 'Chọn các vị kem phối màu hòa quyền (không giới hạn):',
     toppingHelp: 'Thêm thắt Topping ngập tràn hương vị:',
-    accompanimentHelp: 'Dùng kèm các món bánh nướng thơm giòn:',
+    accompanimentHelp: 'Dùng kèm các món kèm ngọt ngào:',
     pricePerGram: 'Đơn giá: {price}đ / gram',
     price: 'Giá',
     quantity: 'Số lượng',

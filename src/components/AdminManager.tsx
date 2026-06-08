@@ -388,6 +388,7 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
     } else {
       setItemPrice(item.price || 0);
       setItemStock(item.stockQuantity || 0);
+      setItemImage(item.image || '');
     }
   };
 
@@ -435,6 +436,7 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
           price: Number(itemPrice),
           stockQuantity: Number(itemStock),
           disabled: itemDisabled,
+          image: itemImage,
         };
         onUpdateTopping(item);
       } else if (editingItem.type === 'accompaniment') {
@@ -445,6 +447,7 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
           price: Number(itemPrice),
           stockQuantity: Number(itemStock),
           disabled: itemDisabled,
+          image: itemImage,
         };
         onUpdateAccompaniment(item);
       }
@@ -471,6 +474,7 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
           price: Number(itemPrice),
           stockQuantity: Number(itemStock),
           disabled: itemDisabled,
+          image: itemImage,
         };
         onAddTopping(item);
       } else if (itemCategory === 'accompaniment') {
@@ -480,6 +484,7 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
           price: Number(itemPrice),
           stockQuantity: Number(itemStock),
           disabled: itemDisabled,
+          image: itemImage,
         };
         onAddAccompaniment(item);
       }
@@ -1304,7 +1309,7 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
                   onClick={() => { setItemCategory('accompaniment'); cancelEditItemObj(); }}
                   className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${itemCategory === 'accompaniment' ? 'bg-white text-[#4A3E3E] shadow-xs' : 'text-stone-500 hover:text-stone-800'}`}
                 >
-                   waffle {isVi ? 'Đồ kèm' : 'Accompaniments'}
+                  🧇 {isVi ? 'Món kèm' : 'Accompaniments'}
                 </button>
               </div>
             </div>
@@ -1371,8 +1376,12 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
 
               {itemCategory === 'topping' && toppings.map(t => (
                 <div key={t.id} className={`p-4 rounded-2xl border transition flex items-center gap-3 ${t.disabled ? 'bg-stone-50 border-stone-150 opacity-60' : 'bg-amber-50/10 border-amber-900/5 hover:bg-amber-50/20'}`}>
-                  {/* Icon represent */}
-                  <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-800 font-bold flex items-center justify-center shrink-0 border border-orange-200">🍪</div>
+                  {/* Image or emoji icon */}
+                  {t.image ? (
+                    <img src={t.image} referrerPolicy="no-referrer" className="w-10 h-10 rounded-xl shrink-0 object-cover border" alt={t.nameVi} />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-850 font-bold flex items-center justify-center shrink-0 border border-orange-200">🍪</div>
+                  )}
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
@@ -1423,8 +1432,12 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
 
               {itemCategory === 'accompaniment' && accompaniments.map(a => (
                 <div key={a.id} className={`p-4 rounded-2xl border transition flex items-center gap-3 ${a.disabled ? 'bg-stone-50 border-stone-150 opacity-60' : 'bg-amber-50/10 border-amber-900/5 hover:bg-amber-50/20'}`}>
-                  {/* Icon represent */}
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 font-bold flex items-center justify-center shrink-0 border border-amber-200">🧇</div>
+                  {/* Image or emoji icon */}
+                  {a.image ? (
+                    <img src={a.image} referrerPolicy="no-referrer" className="w-10 h-10 rounded-xl shrink-0 object-cover border" alt={a.nameVi} />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-850 font-bold flex items-center justify-center shrink-0 border border-amber-200">🧇</div>
+                  )}
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
@@ -1528,74 +1541,78 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
                   />
                 </div>
 
+                {/* Beautiful drag & drop image upload for all categories (flavors, toppings, accompaniments) */}
+                <div>
+                  <label className="block text-[10.5px] font-bold uppercase text-stone-550 mb-1">
+                    {itemCategory === 'flavor' 
+                      ? (isVi ? 'Hình ảnh vị kem (.png, .jpg)' : 'Flavor image (.png, .jpg)')
+                      : itemCategory === 'topping'
+                      ? (isVi ? 'Hình ảnh Topping (.png, .jpg)' : 'Topping image (.png, .jpg)')
+                      : (isVi ? 'Hình ảnh món kèm (.png, .jpg)' : 'Accompaniment image (.png, .jpg)')}
+                  </label>
+                  <div 
+                    className="border-2 border-dashed border-stone-250 hover:border-amber-700 bg-amber-50/5 hover:bg-amber-50/10 rounded-2xl p-4 text-center cursor-pointer transition relative group"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const file = e.dataTransfer.files?.[0];
+                      if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          setItemImage(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    onClick={() => {
+                      const fileInput = document.createElement('input');
+                      fileInput.type = 'file';
+                      fileInput.accept = 'image/*';
+                      fileInput.onchange = (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            setItemImage(reader.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      };
+                      fileInput.click();
+                    }}
+                  >
+                    {itemImage ? (
+                      <div className="flex flex-col items-center gap-1.5 justify-center py-1">
+                        <img src={itemImage} referrerPolicy="no-referrer" className="w-16 h-16 rounded-xl object-cover border shadow-xs" alt="Preview" />
+                        <span className="text-[10px] text-green-600 font-bold">✓ {isVi ? 'Đã nhận hình ảnh thành công' : 'Image loaded successfully'}</span>
+                        <button 
+                          type="button" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setItemImage('');
+                          }}
+                          className="text-[9.5px] font-bold text-rose-600 hover:text-rose-800 hover:underline mt-1 cursor-pointer"
+                        >
+                          ❌ {isVi ? 'Đổi ảnh khác' : 'Remove / Replace image'}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="py-2.5 flex flex-col items-center justify-center">
+                        <span className="text-2xl mb-1 opacity-75 group-hover:scale-110 transition duration-200">📸</span>
+                        <span className="text-[10.5px] font-bold text-stone-600 block">
+                          {isVi ? 'Kéo thả ảnh vào đây' : 'Drag & drop image here'}
+                        </span>
+                        <span className="text-[9.5px] text-stone-450 mt-0.5">
+                          {isVi ? 'hoặc nhấp chuột để chọn file' : 'or click to browse local files'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {/* Flavor specific elements */}
                 {itemCategory === 'flavor' ? (
                   <div className="space-y-3 pt-1 border-t border-dashed mt-2 border-stone-200">
-                    {/* Beautiful drag & drop image upload */}
-                    <div>
-                      <label className="block text-[10.5px] font-bold uppercase text-stone-550 mb-1">
-                        {isVi ? 'Hình ảnh vị kem (.png, .jpg)' : 'Flavor image (.png, .jpg)'}
-                      </label>
-                      <div 
-                        className="border-2 border-dashed border-stone-250 hover:border-amber-700 bg-amber-50/5 hover:bg-amber-50/10 rounded-2xl p-4 text-center cursor-pointer transition relative group"
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          const file = e.dataTransfer.files?.[0];
-                          if (file && file.type.startsWith('image/')) {
-                            const reader = new FileReader();
-                            reader.onload = () => {
-                              setItemImage(reader.result as string);
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
-                        onClick={() => {
-                          const fileInput = document.createElement('input');
-                          fileInput.type = 'file';
-                          fileInput.accept = 'image/*';
-                          fileInput.onchange = (e) => {
-                            const file = (e.target as HTMLInputElement).files?.[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onload = () => {
-                                setItemImage(reader.result as string);
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          };
-                          fileInput.click();
-                        }}
-                      >
-                        {itemImage ? (
-                          <div className="flex flex-col items-center gap-1.5 justify-center py-1">
-                            <img src={itemImage} referrerPolicy="no-referrer" className="w-16 h-16 rounded-xl object-cover border shadow-xs" alt="Preview" />
-                            <span className="text-[10px] text-green-600 font-bold">✓ {isVi ? 'Đã nhận hình ảnh vị kem' : 'Image loaded successfully'}</span>
-                            <button 
-                              type="button" 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setItemImage('');
-                              }}
-                              className="text-[9.5px] font-bold text-rose-600 hover:text-rose-800 hover:underline mt-1 cursor-pointer"
-                            >
-                              ❌ {isVi ? 'Đổi ảnh khác' : 'Remove / Replace image'}
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="py-2.5 flex flex-col items-center justify-center">
-                            <span className="text-2xl mb-1 opacity-75 group-hover:scale-110 transition duration-200">📸</span>
-                            <span className="text-[10.5px] font-bold text-stone-600 block">
-                              {isVi ? 'Kéo thả ảnh vào đây' : 'Drag & drop flavor image here'}
-                            </span>
-                            <span className="text-[9.5px] text-stone-450 mt-0.5">
-                              {isVi ? 'hoặc nhấp chuột để chọn file' : 'or click to browse local files'}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
                     <div>
                       <label className="block text-[10px] font-bold uppercase text-stone-400 mb-0.5">{isVi ? 'Cơ số tồn kho khởi tạo (g)' : 'Starting stock weight (g)'}</label>
                       <input

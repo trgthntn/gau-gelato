@@ -55,6 +55,7 @@ export interface Topping {
   price: number;
   stockQuantity: number;
   disabled?: boolean;
+  image?: string; // Base64 encoded image
 }
 
 export interface Accompaniment {
@@ -64,6 +65,7 @@ export interface Accompaniment {
   price: number;
   stockQuantity: number;
   disabled?: boolean;
+  image?: string; // Base64 encoded image
 }
 
 export interface Voucher {

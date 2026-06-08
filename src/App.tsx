@@ -2205,9 +2205,9 @@ export default function App() {
                                 className={`p-3.5 border rounded-2xl flex flex-col justify-center items-center gap-2.5 transition h-28 select-none cursor-pointer ${scoopFlavors[idxSlot] === fl.id ? 'ring-3 ring-amber-800 scale-102 border-transparent bg-amber-50/20' : 'border-[#4A3E3E]/10 hover:bg-white bg-[#FDFBF7]/40 hover:border-amber-700/50 hover:shadow-xs'}`}
                               >
                                 {fl.image ? (
-                                  <img src={fl.image} referrerPolicy="no-referrer" className="w-12 h-12 rounded-xl object-cover border shadow-2xs shrink-0" alt={fl.nameVi} />
+                                  <img src={fl.image} referrerPolicy="no-referrer" className="w-24 h-12 rounded-xl object-cover border shadow-2xs shrink-0" alt={fl.nameVi} />
                                 ) : (
-                                  <div className="w-12 h-12 pointer-events-none shrink-0" dangerouslySetInnerHTML={{ __html: getFlavorSvg(fl.iconType || 'creamy', fl.color || '#FFAEBC') }} />
+                                  <div className="w-24 h-12 flex items-center justify-center pointer-events-none shrink-0" dangerouslySetInnerHTML={{ __html: getFlavorSvg(fl.iconType || 'creamy', fl.color || '#FFAEBC') }} />
                                 )}
                                 <span className="text-[10.5px] font-black tracking-tight text-center truncate w-full block text-stone-800 leading-tight">
                                   {isVi ? fl.nameVi : fl.nameEn}
@@ -2281,7 +2281,7 @@ export default function App() {
                 <div className="bg-white p-5 rounded-3xl border border-amber-900/5 shadow-sm space-y-6">
                   <div>
                     <h4 className="font-bold text-base text-[#4A3E3E]">{t.modeAccompaniment}</h4>
-                    <p className="text-[10px] text-gray-500 mt-0.5">{isVi ? 'Bạch đậu waffle, vỏ ốc quế giòn nướng thơm lừng bán lẻ riêng biệt.' : 'Waffle baskets, crispy cones and baked brioches served separately.'}</p>
+                    <p className="text-[10px] text-gray-500 mt-0.5">{isVi ? 'Bánh ốc quế, bánh kẹp và các đồ kèm giòn thơm ngon bán lẻ riêng biệt.' : 'Crispy cones, waffle cups and other retail accompaniments served separately.'}</p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2290,14 +2290,19 @@ export default function App() {
                     <div className="space-y-3.5">
                       <span className="block text-xs font-bold text-gray-500 uppercase tracking-wider">{t.accompanimentHelp}</span>
                       {accompaniments.filter(ac => !ac.disabled).map(ac => (
-                        <div key={ac.id} className="flex justify-between items-center p-3.5 rounded-2xl bg-amber-50/15 border border-stone-200">
-                          <div>
-                            <strong className="block text-xs font-bold text-stone-800">{isVi ? ac.nameVi : ac.nameEn}</strong>
-                            <span className="text-[10px] font-mono font-bold text-amber-800 mt-1 block">{ac.price.toLocaleString('vi-VN')}đ</span>
+                        <div key={ac.id} className="flex justify-between items-center p-3.5 rounded-2xl bg-amber-50/15 border border-stone-200 gap-3.5">
+                          <div className="flex items-center gap-3">
+                            {ac.image && (
+                              <img src={ac.image} referrerPolicy="no-referrer" className="w-14 h-8 object-cover rounded-lg border shadow-3xs shrink-0" alt={ac.nameVi} />
+                            )}
+                            <div>
+                              <strong className="block text-xs font-bold text-stone-800">{isVi ? ac.nameVi : ac.nameEn}</strong>
+                              <span className="text-[10px] font-mono font-bold text-amber-800 mt-1 block">{ac.price.toLocaleString('vi-VN')}đ</span>
+                            </div>
                           </div>
                           <button
                             onClick={() => addToCartAccompaniments(ac, true)}
-                            className="bg-[#4A3E3E] hover:bg-amber-900 text-stone-50 font-bold text-[10px] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer select-none py-1"
+                            className="bg-[#4A3E3E] hover:bg-amber-900 text-stone-50 font-bold text-[10px] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer select-none py-1 shrink-0"
                           >
                             +
                           </button>
@@ -2309,14 +2314,19 @@ export default function App() {
                     <div className="space-y-3.5">
                       <span className="block text-xs font-bold text-gray-500 uppercase tracking-wider">{isVi ? 'Sữa, Chocochip & Toppings bán lẻ dán bàn' : 'Retail dry toppings & extra dips'}</span>
                       {toppings.filter(tp => !tp.disabled).map(tp => (
-                        <div key={tp.id} className="flex justify-between items-center p-3.5 rounded-2xl bg-amber-50/15 border border-stone-200">
-                          <div>
-                            <strong className="block text-xs font-bold text-stone-850">{isVi ? tp.nameVi : tp.nameEn}</strong>
-                            <span className="text-[10px] font-mono font-bold text-amber-800 mt-1 block">{tp.price.toLocaleString('vi-VN')}đ</span>
+                        <div key={tp.id} className="flex justify-between items-center p-3.5 rounded-2xl bg-amber-50/15 border border-stone-200 gap-3.5">
+                          <div className="flex items-center gap-3">
+                            {tp.image && (
+                              <img src={tp.image} referrerPolicy="no-referrer" className="w-14 h-8 object-cover rounded-lg border shadow-3xs shrink-0" alt={tp.nameVi} />
+                            )}
+                            <div>
+                              <strong className="block text-xs font-bold text-stone-850">{isVi ? tp.nameVi : tp.nameEn}</strong>
+                              <span className="text-[10px] font-mono font-bold text-amber-800 mt-1 block">{tp.price.toLocaleString('vi-VN')}đ</span>
+                            </div>
                           </div>
                           <button
                             onClick={() => addToCartAccompaniments(tp, false)}
-                            className="bg-[#4A3E3E] hover:bg-amber-900 text-stone-50 font-bold text-[10px] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer select-none py-1"
+                            className="bg-[#4A3E3E] hover:bg-amber-900 text-stone-50 font-bold text-[10px] w-8 h-8 rounded-full flex items-center justify-center cursor-pointer select-none py-1 shrink-0"
                           >
                             +
                           </button>
