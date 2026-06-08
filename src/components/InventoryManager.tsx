@@ -25,7 +25,8 @@ interface InventoryManagerProps {
     actionType: 'delta' | 'calibrate' | 'transfer',
     value: number,
     reasonVi: string,
-    reasonEn: string
+    reasonEn: string,
+    importPrice?: number
   ) => void;
 }
 
@@ -60,6 +61,7 @@ export const InventoryManager: React.FC<InventoryManagerProps> = ({
   const [transferAmount, setTransferAmount] = useState<number | ''>('');
   const [transferTargetBranchId, setTransferTargetBranchId] = useState<string>(''); // Used when sending from central
   const [notes, setNotes] = useState('');
+  const [importPriceInput, setImportPriceInput] = useState<number | ''>('');
 
   // Selected branch/warehouse metadata
   const selectedBranchName = selectedBranchId === 'central'
@@ -146,12 +148,14 @@ export const InventoryManager: React.FC<InventoryManagerProps> = ({
     const amountVal = Number(adjustAmount);
     const netAmount = isReplenish ? amountVal : -amountVal;
 
+    const priceVal = isReplenish && importPriceInput !== '' ? Number(importPriceInput) : undefined;
+
     const reasonTextVi = isReplenish 
-      ? `Nhập thêm kho thủ công: ${notes.trim() || 'Thủ kho nhập bồi hoàn'}`
+      ? `Nhập thêm kho thủ công: ${notes.trim() || 'Thủ kho nhập bồi hoàn'}${priceVal ? ` (Giá nhập: ${priceVal.toLocaleString('vi-VN')}đ)` : ''}`
       : `Xuất hao hụt / Hủy sản phẩm lỗi: ${notes.trim() || 'Hao hụt hao mòn hao phí'}`;
 
     const reasonTextEn = isReplenish 
-      ? `Manual replenishment: ${notes.trim() || 'Warehouse refill'}`
+      ? `Manual replenishment: ${notes.trim() || 'Warehouse refill'}${priceVal ? ` (Import price: ${priceVal.toLocaleString('vi-VN')}đ)` : ''}`
       : `Scrapped / Leakage loss write-offs: ${notes.trim() || 'Operational write-off'}`;
 
     onInventoryAction(
@@ -162,10 +166,12 @@ export const InventoryManager: React.FC<InventoryManagerProps> = ({
       'delta',
       netAmount,
       reasonTextVi,
-      reasonTextEn
+      reasonTextEn,
+      priceVal
     );
 
     setAdjustAmount('');
+    setImportPriceInput('');
     setNotes('');
     alert(isVi ? "Đã cập nhật kho hàng thành công!" : "Inventory level updated successfully!");
   };
@@ -630,6 +636,34 @@ export const InventoryManager: React.FC<InventoryManagerProps> = ({
                             {selectedItemUnit.split(' ')[0]}
                           </span>
                         </div>
+                      </div>
+
+                      {/* Import Price input */}
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-stone-500 mb-1">
+                          {selectedItemType === 'flavor' 
+                            ? (isVi ? 'Đơn giá nhập kho (đ / kg):' : 'Import price (đ / kg):')
+                            : (isVi ? 'Đơn giá nhập kho (đ / chiếc):' : 'Import price (đ / item):')}
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min="0"
+                            value={importPriceInput}
+                            onChange={e => {
+                              const val = e.target.value;
+                              setImportPriceInput(val === '' ? '' : Math.max(0, parseInt(val) || 0));
+                            }}
+                            placeholder={isVi ? 'Ví dụ: 120000' : 'e.g. 12000s'}
+                            className="w-full text-xs border rounded-xl p-2.5 pr-12 bg-stone-50 focus:outline-none focus:ring-1 focus:ring-amber-500 font-bold font-mono"
+                          />
+                          <span className="absolute right-3 top-2.5 text-[10px] font-black text-stone-400">
+                            đ / {selectedItemType === 'flavor' ? 'kg' : (isVi ? 'chiếc' : 'pcs')}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-amber-900/60 leading-none mt-1">
+                          💡 {isVi ? 'Chỉ áp dụng khi ấn nút [Nhập thêm]' : 'Only applied when clicking the [Refill (+)] button'}
+                        </p>
                       </div>
                     </div>
                   )}

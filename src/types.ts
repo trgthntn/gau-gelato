@@ -38,13 +38,14 @@ export interface Flavor {
   id: string;
   nameVi: string;
   nameEn: string;
-  color: string;
-  iconType: string;
+  color?: string;
+  iconType?: string;
   descVi: string;
   descEn: string;
   stockGrams: number;
-  costPerKg: number; // For accounting
+  costPerKg?: number; // Optional since we are removing it from flavor menu management
   disabled?: boolean;
+  image?: string; // Base64 encoded image
 }
 
 export interface Topping {
@@ -167,4 +168,5 @@ export interface InventoryLog {
   reasonVi: string;
   reasonEn: string;
   staffName: string;
+  importPrice?: number; // Price elements at which it was stocked in
 }

@@ -1354,7 +1354,8 @@ export default function App() {
     actionType: 'delta' | 'calibrate' | 'transfer',
     value: number,
     reasonVi: string,
-    reasonEn: string
+    reasonEn: string,
+    importPrice?: number
   ) => {
     if (!activeUser) return;
 
@@ -1382,7 +1383,8 @@ export default function App() {
         changeAmount: value,
         reasonVi,
         reasonEn,
-        staffName: activeUser.name
+        staffName: activeUser.name,
+        importPrice
       };
       setInventoryLogs(prev => [...prev, logItem]);
 
@@ -2202,7 +2204,11 @@ export default function App() {
                                 }}
                                 className={`p-1 border rounded-xl flex flex-col justify-between items-center transition h-17 select-none cursor-pointer ${scoopFlavors[idxSlot] === fl.id ? 'ring-2 ring-amber-800 scale-102 border-transparent' : 'border-[#4A3E3E]/10 hover:bg-white bg-[#FDFBF7]/30'}`}
                               >
-                                <div className="w-8 h-8 pointer-events-none" dangerouslySetInnerHTML={{ __html: getFlavorSvg(fl.iconType, fl.color) }} />
+                                {fl.image ? (
+                                  <img src={fl.image} referrerPolicy="no-referrer" className="w-8 h-8 rounded-lg object-cover border" alt={fl.nameVi} />
+                                ) : (
+                                  <div className="w-8 h-8 pointer-events-none" dangerouslySetInnerHTML={{ __html: getFlavorSvg(fl.iconType || 'creamy', fl.color || '#FFAEBC') }} />
+                                )}
                                 <span className="text-[7px] font-bold tracking-tight text-center truncate w-full block text-stone-700 leading-none mt-1">
                                   {isVi ? fl.nameVi : fl.nameEn}
                                 </span>
@@ -2973,6 +2979,7 @@ export default function App() {
             branches={branches}
             activeBranchId={activeBranch.id}
             userRole={activeUser.role}
+            inventoryLogs={inventoryLogs}
             onAddExpense={handleAddCostExpense}
           />
         )}

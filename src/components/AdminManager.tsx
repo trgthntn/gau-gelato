@@ -91,6 +91,7 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
   const [itemDescVi, setItemDescVi] = useState('');
   const [itemDescEn, setItemDescEn] = useState('');
   const [itemDisabled, setItemDisabled] = useState<boolean>(false);
+  const [itemImage, setItemImage] = useState<string>('');
 
   // Voucher custom sub-tabs & usage tracker
   const [voucherSubTab, setVoucherSubTab] = useState<'valid' | 'invalid'>('valid');
@@ -378,11 +379,12 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
     setItemDisabled(item.disabled || false);
     if (type === 'flavor') {
       setItemStock(item.stockGrams);
-      setItemCostPerKg(item.costPerKg);
+      setItemCostPerKg(item.costPerKg || 0);
       setItemColor(item.color || '#FFAEBC');
       setItemIcon(item.iconType || 'creamy');
       setItemDescVi(item.descVi || '');
       setItemDescEn(item.descEn || '');
+      setItemImage(item.image || '');
     } else {
       setItemPrice(item.price || 0);
       setItemStock(item.stockQuantity || 0);
@@ -395,12 +397,13 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
     setItemNameEn('');
     setItemPrice(0);
     setItemStock(10000);
-    setItemCostPerKg(120000);
+    setItemCostPerKg(0);
     setItemColor('#FFAEBC');
     setItemIcon('creamy');
     setItemDescVi('');
     setItemDescEn('');
     setItemDisabled(false);
+    setItemImage('');
   };
 
   const handleItemSubmit = (e: React.FormEvent) => {
@@ -414,13 +417,14 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
           id: editingItem.id,
           nameVi: itemNameVi,
           nameEn: itemNameEn,
-          color: itemColor,
-          iconType: itemIcon,
+          color: itemColor || '#FFAEBC',
+          iconType: itemIcon || 'creamy',
           descVi: itemDescVi,
           descEn: itemDescEn,
           stockGrams: Number(itemStock),
           costPerKg: Number(itemCostPerKg),
           disabled: itemDisabled,
+          image: itemImage,
         };
         onUpdateFlavor(item);
       } else if (editingItem.type === 'topping') {
@@ -450,13 +454,14 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
         const item: Omit<Flavor, 'id'> = {
           nameVi: itemNameVi,
           nameEn: itemNameEn,
-          color: itemColor,
-          iconType: itemIcon,
+          color: itemColor || '#FFAEBC',
+          iconType: itemIcon || 'creamy',
           descVi: itemDescVi,
           descEn: itemDescEn,
           stockGrams: Number(itemStock),
           costPerKg: Number(itemCostPerKg),
           disabled: itemDisabled,
+          image: itemImage,
         };
         onAddFlavor(item);
       } else if (itemCategory === 'topping') {
@@ -1308,8 +1313,14 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
             <div className="space-y-3 max-h-[550px] overflow-y-auto pr-1">
               {itemCategory === 'flavor' && flavors.map(f => (
                 <div key={f.id} className={`p-4 rounded-2xl border transition flex items-center gap-3 ${f.disabled ? 'bg-stone-50 border-stone-150 opacity-60' : 'bg-amber-50/10 border-amber-900/5 hover:bg-amber-50/20'}`}>
-                  {/* Decorative Color orb */}
-                  <div className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center border font-mono font-bold" style={{ backgroundColor: f.color }} />
+                  {/* Image/color preview */}
+                  {f.image ? (
+                    <img src={f.image} referrerPolicy="no-referrer" className="w-10 h-10 rounded-xl shrink-0 object-cover border" alt={f.nameVi} />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center border font-mono text-xl" style={{ backgroundColor: f.color || '#FFAEBC' }}>
+                      🍦
+                    </div>
+                  )}
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
@@ -1321,7 +1332,6 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
                     </div>
                     <span className="text-[10.5px] text-gray-500 block truncate">{isVi ? f.descVi : f.descEn}</span>
                     <div className="flex items-center gap-3 mt-1.5 pt-1.5 border-t border-dashed border-stone-200/50 text-[10.5px] text-stone-500 font-medium font-mono">
-                      <span><strong>{isVi ? 'Giá vốn:' : 'Base cost:'}</strong> {f.costPerKg.toLocaleString('vi-VN')}đ/kg</span>
                       <span><strong>{isVi ? 'Cơ số tồn:' : 'Default stock:'}</strong> {f.stockGrams.toLocaleString()}g</span>
                     </div>
                   </div>
@@ -1521,66 +1531,81 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
                 {/* Flavor specific elements */}
                 {itemCategory === 'flavor' ? (
                   <div className="space-y-3 pt-1 border-t border-dashed mt-2 border-stone-200">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase text-stone-400 mb-0.5">{isVi ? 'Mã màu Hex' : 'Orb color color code'}</label>
-                        <div className="flex gap-1.5 items-center">
-                          <input
-                            type="color"
-                            value={itemColor}
-                            onChange={e => setItemColor(e.target.value)}
-                            className="w-8 h-8 rounded shrink-0 border border-stone-200 p-0 overflow-hidden cursor-pointer"
-                          />
-                          <input
-                            type="text"
-                            required
-                            value={itemColor}
-                            onChange={e => setItemColor(e.target.value)}
-                            className="w-full text-xs border rounded-lg p-1.5 bg-[#FDFBF7]/30 text-center uppercase font-mono"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase text-stone-400 mb-0.5">{isVi ? 'Giá vốn (/ kg)' : 'Cost per Kg'}</label>
-                        <input
-                          type="number"
-                          required
-                          value={itemCostPerKg === 0 ? '' : itemCostPerKg}
-                          onChange={e => setItemCostPerKg(Math.max(0, Number(e.target.value)))}
-                          placeholder="120,000"
-                          className="w-full text-xs border rounded-xl p-2 bg-[#FDFBF7]/30 font-medium font-mono"
-                        />
+                    {/* Beautiful drag & drop image upload */}
+                    <div>
+                      <label className="block text-[10.5px] font-bold uppercase text-stone-550 mb-1">
+                        {isVi ? 'Hình ảnh vị kem (.png, .jpg)' : 'Flavor image (.png, .jpg)'}
+                      </label>
+                      <div 
+                        className="border-2 border-dashed border-stone-250 hover:border-amber-700 bg-amber-50/5 hover:bg-amber-50/10 rounded-2xl p-4 text-center cursor-pointer transition relative group"
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const file = e.dataTransfer.files?.[0];
+                          if (file && file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                              setItemImage(reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        onClick={() => {
+                          const fileInput = document.createElement('input');
+                          fileInput.type = 'file';
+                          fileInput.accept = 'image/*';
+                          fileInput.onchange = (e) => {
+                            const file = (e.target as HTMLInputElement).files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                setItemImage(reader.result as string);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          };
+                          fileInput.click();
+                        }}
+                      >
+                        {itemImage ? (
+                          <div className="flex flex-col items-center gap-1.5 justify-center py-1">
+                            <img src={itemImage} referrerPolicy="no-referrer" className="w-16 h-16 rounded-xl object-cover border shadow-xs" alt="Preview" />
+                            <span className="text-[10px] text-green-600 font-bold">✓ {isVi ? 'Đã nhận hình ảnh vị kem' : 'Image loaded successfully'}</span>
+                            <button 
+                              type="button" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setItemImage('');
+                              }}
+                              className="text-[9.5px] font-bold text-rose-600 hover:text-rose-800 hover:underline mt-1 cursor-pointer"
+                            >
+                              ❌ {isVi ? 'Đổi ảnh khác' : 'Remove / Replace image'}
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="py-2.5 flex flex-col items-center justify-center">
+                            <span className="text-2xl mb-1 opacity-75 group-hover:scale-110 transition duration-200">📸</span>
+                            <span className="text-[10.5px] font-bold text-stone-600 block">
+                              {isVi ? 'Kéo thả ảnh vào đây' : 'Drag & drop flavor image here'}
+                            </span>
+                            <span className="text-[9.5px] text-stone-450 mt-0.5">
+                              {isVi ? 'hoặc nhấp chuột để chọn file' : 'or click to browse local files'}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase text-stone-400 mb-0.5">{isVi ? 'Mẫu Icon vị' : 'Flavor icon selector'}</label>
-                        <select
-                          value={itemIcon}
-                          onChange={e => setItemIcon(e.target.value)}
-                          className="w-full text-xs border rounded-xl p-2 bg-[#FDFBF7]/30 font-bold"
-                        >
-                          <option value="creamy">🍨 Creamy Cone</option>
-                          <option value="fruity">🍓 Sweet Berry</option>
-                          <option value="chocolate">🍫 Cocoa Choco</option>
-                          <option value="matcha">🍵 Royal Green Matcha</option>
-                          <option value="nuts">🥜 Peanut Butter</option>
-                          <option value="mint">🌿 Cool Ice Mint</option>
-                          <option value="coconut">🥥 Fresh Coconut</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase text-stone-400 mb-0.5">{isVi ? 'Cơ số tồn kho (g)' : 'Starting stock weight (g)'}</label>
-                        <input
-                          type="number"
-                          required
-                          value={itemStock === 0 ? '' : itemStock}
-                          onChange={e => setItemStock(Math.max(0, Number(e.target.value)))}
-                          placeholder="10000"
-                          className="w-full text-xs border rounded-xl p-2 bg-[#FDFBF7]/30 font-medium font-mono"
-                        />
-                      </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase text-stone-400 mb-0.5">{isVi ? 'Cơ số tồn kho khởi tạo (g)' : 'Starting stock weight (g)'}</label>
+                      <input
+                        type="number"
+                        required
+                        value={itemStock === 0 ? '' : itemStock}
+                        onChange={e => setItemStock(Math.max(0, Number(e.target.value)))}
+                        placeholder="10000"
+                        className="w-full text-xs border rounded-xl p-2.5 bg-[#FDFBF7]/30 font-medium font-mono"
+                      />
                     </div>
 
                     <div>

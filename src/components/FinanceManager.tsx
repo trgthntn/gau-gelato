@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { OperationalExpense, Order, Branch, Language } from '../types';
+import { OperationalExpense, Order, Branch, Language, InventoryLog } from '../types';
 import { LOCALES } from '../locales';
 
 interface FinanceManagerProps {
@@ -14,6 +14,7 @@ interface FinanceManagerProps {
   branches: Branch[];
   activeBranchId: string;
   userRole: 'admin' | 'staff';
+  inventoryLogs: InventoryLog[];
   onAddExpense: (category: 'rent' | 'utilities' | 'labor' | 'repair' | 'equipment' | 'ingredients' | 'other', amount: number, descVi: string, descEn: string, branchId: string) => void;
 }
 
@@ -24,6 +25,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
   branches,
   activeBranchId,
   userRole,
+  inventoryLogs,
   onAddExpense
 }) => {
   const isVi = lang === 'vi';
@@ -45,24 +47,22 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
   // 1. Gross Revenue
   const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.total, 0);
 
-  // 2. Simulated COGS: We aggregate costs of raw ingredients consumed by orders
-  const totalCOGS = filteredOrders.reduce((sum, o) => {
-    let orderCogs = 0;
-    o.items.forEach(item => {
-      if (item.type === 'set') {
-        const size = item.flavorsSelected?.length || 1;
-        // Assume 80g per scoop, ingredient cost per scoop is roughly 9,000đ based on average pricing
-        orderCogs += size * 1000 * item.quantity; 
-      } else if (item.type === 'gram') {
-        // Assume cost of 90đ per gram based on average rate of weigthed scoops
-        orderCogs += (item.gramWeight || 100) * 90 * item.quantity;
-      } else {
-        // Accompaniment costs are roughly 30% of selling price
-        orderCogs += (item.price * 0.3) * item.quantity;
+  // 2. Actual COGS Procurement: We aggregate the total cost of ingredients and materials purchased & stocked-in from logs
+  const totalCOGS = inventoryLogs
+    .filter(log => selectedBranchId === 'ALL' || log.branchId === selectedBranchId)
+    .reduce((sum, log) => {
+      if (log.changeAmount > 0 && log.importPrice && log.importPrice > 0) {
+        if (log.itemType === 'flavor') {
+          // Grams unit: changeAmount / 1000 = kg, multiplied by price per KG
+          const weightKg = log.changeAmount / 1000;
+          return sum + (weightKg * log.importPrice);
+        } else {
+          // Piece unit: item count multiplied by price per piece
+          return sum + (log.changeAmount * log.importPrice);
+        }
       }
-    });
-    return sum + orderCogs;
-  }, 0);
+      return sum;
+    }, 0);
 
   // 3. Operational expenses (Rent, Wages, Bills)
   const totalOpex = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
