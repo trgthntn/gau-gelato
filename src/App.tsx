@@ -749,7 +749,7 @@ export default function App() {
 
   // --- 3. SYSTEM TABS & CHANNELS ---
   const [activeTab, setActiveTab] = useState<'sales' | 'inventory' | 'loyalty' | 'invoices' | 'costs' | 'admin' | 'audits' | 'android'>('sales');
-  const [loyaltySubTab, setLoyaltySubTab] = useState<'zalo' | 'android'>('zalo');
+  const [loyaltySubTab, setLoyaltySubTab] = useState<'zalo' | 'android' | 'system'>('zalo');
 
   // --- 4. SALES POS ACTIVE WORKOUT checkout STATES ---
   const [salesModel, setSalesModel] = useState<'set' | 'weight' | 'companions'>('set');
@@ -1602,6 +1602,138 @@ export default function App() {
     setVouchers(prev => prev.filter(v => v.code !== vCode));
   };
 
+  const handleAddFlavorAction = (fData: Omit<Flavor, 'id'>) => {
+    const nextId = `f_${Date.now().toString().slice(-4)}`;
+    const newFlavor: Flavor = { ...fData, id: nextId };
+    setFlavors(prev => [...prev, newFlavor]);
+    if (activeUser && activeBranch) {
+      logAudit(
+        activeUser.id,
+        activeUser.name,
+        activeBranch.id,
+        activeBranch.name,
+        `Thêm mới vị kem vào danh mục: ${fData.nameVi}`,
+        `Added new flavor to menu register: ${fData.nameEn}`
+      );
+    }
+  };
+
+  const handleUpdateFlavorAction = (updatedFlavor: Flavor) => {
+    setFlavors(prev => prev.map(f => f.id === updatedFlavor.id ? updatedFlavor : f));
+    if (activeUser && activeBranch) {
+      logAudit(
+        activeUser.id,
+        activeUser.name,
+        activeBranch.id,
+        activeBranch.name,
+        `Cập nhật thông tin vị kem: ${updatedFlavor.nameVi} (Trạng thái: ${updatedFlavor.disabled ? 'Khóa' : 'Hoạt động'})`,
+        `Updated flavor info details: ${updatedFlavor.nameEn} (Status: ${updatedFlavor.disabled ? 'Disabled' : 'Active'})`
+      );
+    }
+  };
+
+  const handleDeleteFlavorAction = (fId: string) => {
+    setFlavors(prev => prev.filter(f => f.id !== fId));
+    if (activeUser && activeBranch) {
+      logAudit(
+        activeUser.id,
+        activeUser.name,
+        activeBranch.id,
+        activeBranch.name,
+        `Xóa vị kem khỏi danh mục: Mã ${fId}`,
+        `Removed flavor from registry: Code ${fId}`
+      );
+    }
+  };
+
+  const handleAddToppingAction = (tData: Omit<Topping, 'id'>) => {
+    const nextId = `t_${Date.now().toString().slice(-4)}`;
+    const newTopping: Topping = { ...tData, id: nextId };
+    setToppings(prev => [...prev, newTopping]);
+    if (activeUser && activeBranch) {
+      logAudit(
+        activeUser.id,
+        activeUser.name,
+        activeBranch.id,
+        activeBranch.name,
+        `Thêm mới Topping vào danh mục: ${tData.nameVi}`,
+        `Added new topping to menu register: ${tData.nameEn}`
+      );
+    }
+  };
+
+  const handleUpdateToppingAction = (updatedTopping: Topping) => {
+    setToppings(prev => prev.map(t => t.id === updatedTopping.id ? updatedTopping : t));
+    if (activeUser && activeBranch) {
+      logAudit(
+        activeUser.id,
+        activeUser.name,
+        activeBranch.id,
+        activeBranch.name,
+        `Cập nhật thông tin Topping: ${updatedTopping.nameVi} (Trạng thái: ${updatedTopping.disabled ? 'Khóa' : 'Hoạt động'})`,
+        `Updated topping info details: ${updatedTopping.nameEn} (Status: ${updatedTopping.disabled ? 'Disabled' : 'Active'})`
+      );
+    }
+  };
+
+  const handleDeleteToppingAction = (tId: string) => {
+    setToppings(prev => prev.filter(t => t.id !== tId));
+    if (activeUser && activeBranch) {
+      logAudit(
+        activeUser.id,
+        activeUser.name,
+        activeBranch.id,
+        activeBranch.name,
+        `Xóa Topping khỏi danh mục: Mã ${tId}`,
+        `Removed topping from registry: Code ${tId}`
+      );
+    }
+  };
+
+  const handleAddAccompanimentAction = (aData: Omit<Accompaniment, 'id'>) => {
+    const nextId = `a_${Date.now().toString().slice(-4)}`;
+    const newAcc: Accompaniment = { ...aData, id: nextId };
+    setAccompaniments(prev => [...prev, newAcc]);
+    if (activeUser && activeBranch) {
+      logAudit(
+        activeUser.id,
+        activeUser.name,
+        activeBranch.id,
+        activeBranch.name,
+        `Thêm mới Đồ ăn kèm vào danh mục: ${aData.nameVi}`,
+        `Added new accompaniment to menu register: ${aData.nameEn}`
+      );
+    }
+  };
+
+  const handleUpdateAccompanimentAction = (updatedAcc: Accompaniment) => {
+    setAccompaniments(prev => prev.map(a => a.id === updatedAcc.id ? updatedAcc : a));
+    if (activeUser && activeBranch) {
+      logAudit(
+        activeUser.id,
+        activeUser.name,
+        activeBranch.id,
+        activeBranch.name,
+        `Cập nhật đồ ăn kèm: ${updatedAcc.nameVi} (Trạng thái: ${updatedAcc.disabled ? 'Khóa' : 'Hoạt động'})`,
+        `Updated accompaniment details: ${updatedAcc.nameEn} (Status: ${updatedAcc.disabled ? 'Disabled' : 'Active'})`
+      );
+    }
+  };
+
+  const handleDeleteAccompanimentAction = (aId: string) => {
+    setAccompaniments(prev => prev.filter(a => a.id !== aId));
+    if (activeUser && activeBranch) {
+      logAudit(
+        activeUser.id,
+        activeUser.name,
+        activeBranch.id,
+        activeBranch.name,
+        `Xóa đồ ăn kèm khỏi danh mục: Mã ${aId}`,
+        `Removed accompaniment from registry: Code ${aId}`
+      );
+    }
+  };
+
   // Update electronic invoice codes
   const handleUpdateInvoiceStatus = (bId: string, status: any, invCode: string, explainNote?: string) => {
     setOrders(prev => prev.map(o => {
@@ -1814,35 +1946,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#FFF7EE] font-sans flex flex-col justify-between text-stone-800">
       
-      {isQuotaExceeded && (
-        <div className="bg-emerald-500/10 border-b border-emerald-500/20 py-2 px-4 text-center text-[11px] text-emerald-800 font-bold flex items-center justify-center gap-2 select-none no-print">
-          <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-          <span>{isVi 
-            ? "CƠ SỞ DỮ LIỆU CỤC BỘ (BỀN VỮNG): Hệ thống hoạt động hoàn toàn miễn phí & siêu tốc trên bộ nhớ trình duyệt (LocalStorage). Không lo giới hạn quota hay gián đoạn mạng!" 
-            : "LOCAL DATABASE MODE (STABLE & FREE): System running fully locally on high-speed browser cache (LocalStorage). Free from cloud quota restrictions!"}
-          </span>
-          <span className="bg-emerald-100/80 text-emerald-900 border border-emerald-400/30 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold uppercase shrink-0">{isVi ? "CHẾ ĐỘ AN TOÀN" : "LOCAL DATABASE ACTIVE"}</span>
-          
-          <div className="flex items-center gap-1.5 ml-1 shrink-0">
-            <button
-              onClick={exportLocalBackup}
-              className="bg-emerald-700 hover:bg-emerald-850 text-white text-[9px] px-2 py-0.5 rounded-lg transition cursor-pointer select-none shrink-0"
-            >
-              📥 {isVi ? "Xuất sao lưu" : "Export Backup"}
-            </button>
-            <label className="bg-[#4D3E3E] hover:bg-[#3D2E2E] text-white text-[9px] px-2 py-0.5 rounded-lg transition cursor-pointer select-none shrink-0">
-              📤 {isVi ? "Nhập sao lưu" : "Import Backup"}
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleImportBackup}
-                className="hidden"
-              />
-            </label>
-          </div>
-        </div>
-      )}
-      {!isQuotaExceeded && isOffline && (
+      {isOffline && (
         <div className="bg-stone-500/10 border-b border-stone-500/10 py-2 px-4 text-center text-[11px] text-stone-700 font-bold flex items-center justify-center gap-2 select-none no-print">
           <span>📶</span>
           <span>{isVi 
@@ -1942,13 +2046,6 @@ export default function App() {
           </button>
 
           <button
-            onClick={() => setActiveTab('loyalty')}
-            className={`flex-shrink-0 text-xs font-bold py-2 px-4 rounded-xl transition cursor-pointer flex items-center gap-1.5 ${activeTab === 'loyalty' ? 'bg-[#4A3E3E]/10 text-[#4A3E3E]' : 'text-stone-500 hover:bg-stone-50'}`}
-          >
-            💬 {t.tabLoyalty}
-          </button>
-
-          <button
             onClick={() => setActiveTab('invoices')}
             className={`flex-shrink-0 text-xs font-bold py-2 px-4 rounded-xl transition cursor-pointer flex items-center gap-1.5 ${activeTab === 'invoices' ? 'bg-[#4A3E3E]/10 text-[#4A3E3E]' : 'text-stone-500 hover:bg-stone-50'}`}
           >
@@ -1976,6 +2073,13 @@ export default function App() {
             className={`flex-shrink-0 text-xs font-bold py-2 px-4 rounded-xl transition cursor-pointer flex items-center gap-1.5 ${activeTab === 'audits' ? 'bg-[#4A3E3E]/10 text-[#4A3E3E]' : 'text-stone-500 hover:bg-stone-50'}`}
           >
             📋 {t.tabAudits}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('loyalty')}
+            className={`flex-shrink-0 text-xs font-bold py-2 px-4 rounded-xl transition cursor-pointer flex items-center gap-1.5 ${activeTab === 'loyalty' ? 'bg-[#4A3E3E]/10 text-[#4A3E3E]' : 'text-stone-500 hover:bg-stone-50'}`}
+          >
+            ⚙️ {t.tabLoyalty}
           </button>
 
         </div>
@@ -2088,7 +2192,7 @@ export default function App() {
 
                           {/* Grid with 9 colorful illustrations mapping */}
                           <div className="grid grid-cols-3 sm:grid-cols-9 gap-1.5">
-                            {flavors.map((fl) => (
+                            {flavors.filter(fl => !fl.disabled).map((fl) => (
                               <button
                                 key={fl.id}
                                 onClick={() => {
@@ -2179,7 +2283,7 @@ export default function App() {
                     {/* Accompaniments cards */}
                     <div className="space-y-3.5">
                       <span className="block text-xs font-bold text-gray-500 uppercase tracking-wider">{t.accompanimentHelp}</span>
-                      {accompaniments.map(ac => (
+                      {accompaniments.filter(ac => !ac.disabled).map(ac => (
                         <div key={ac.id} className="flex justify-between items-center p-3.5 rounded-2xl bg-amber-50/15 border border-stone-200">
                           <div>
                             <strong className="block text-xs font-bold text-stone-800">{isVi ? ac.nameVi : ac.nameEn}</strong>
@@ -2198,7 +2302,7 @@ export default function App() {
                     {/* Standalone toppings cards */}
                     <div className="space-y-3.5">
                       <span className="block text-xs font-bold text-gray-500 uppercase tracking-wider">{isVi ? 'Sữa, Chocochip & Toppings bán lẻ dán bàn' : 'Retail dry toppings & extra dips'}</span>
-                      {toppings.map(tp => (
+                      {toppings.filter(tp => !tp.disabled).map(tp => (
                         <div key={tp.id} className="flex justify-between items-center p-3.5 rounded-2xl bg-amber-50/15 border border-stone-200">
                           <div>
                             <strong className="block text-xs font-bold text-stone-850">{isVi ? tp.nameVi : tp.nameEn}</strong>
@@ -2565,8 +2669,101 @@ export default function App() {
                 >
                   🤖 {isVi ? 'Ứng dụng Android' : 'Android App'}
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setLoyaltySubTab('system')}
+                  className={`py-2 px-5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                    loyaltySubTab === 'system'
+                      ? 'bg-[#4A3E3E] text-white shadow-sm'
+                      : 'text-stone-500 hover:text-stone-850 hover:bg-[#4A3E3E]/5'
+                  }`}
+                >
+                  💾 {isVi ? 'Sao lưu dữ liệu' : 'Data backups'}
+                </button>
               </div>
             </div>
+
+            {loyaltySubTab === 'system' && (
+              <div className="space-y-8 max-w-4xl mx-auto text-stone-800">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-3xl text-emerald-800 font-sans space-y-4">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-3.5 w-3.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                    <h4 className="text-base font-bold font-display">
+                      {isVi ? 'CƠ SỞ DỮ LIỆU CỤC BỘ (BỀN VỮNG)' : 'LOCAL DURABLE OFFLINE-FIRST ENGINE'}
+                    </h4>
+                    <span className="ml-auto bg-emerald-100/80 text-emerald-900 border border-emerald-400/30 text-[9px] px-2 py-0.5 rounded font-mono font-bold uppercase">
+                      {isVi ? 'Đang hoạt động' : 'ACTIVE'}
+                    </span>
+                  </div>
+                  
+                  <p className="text-xs leading-relaxed text-emerald-950">
+                    {isVi 
+                      ? '🐻 Gấu Gelato tích hợp hệ thống lưu lữu Ngoại Tuyến Toàn Diện (Offline-First) trên cơ chế LocalStorage. Toàn bộ dữ liệu hóa đơn, kho bãi, nhân viên, chi nhánh và sổ sách chi phí đều được lưu trữ trực tiếp trên thiết bị của bạn. Không sợ mất kết nối mạng hay chậm trễ!'
+                      : '🐻 Gấu Gelato integrates a complete Client-Side Local Storage database. Sales tickets, live inventories, staff registry, costs ledger are cached locally inside your browser.'}
+                  </p>
+
+                  <div className="bg-white/80 p-4 rounded-2xl border border-emerald-500/10 text-xs text-stone-800 space-y-2">
+                    <h5 className="font-bold text-[#4A3E3E] uppercase text-[10px] tracking-wider border-b pb-1">
+                      📊 {isVi ? 'Thống kê dữ liệu hiện hành' : 'Cached Datatables Statistics'}
+                    </h5>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                      <div className="bg-stone-50/50 p-2 rounded-xl border border-stone-200/50 text-center">
+                        <span className="text-[10px] text-gray-500 block">{isVi ? 'Chi nhánh' : 'Branches'}</span>
+                        <strong className="text-base font-mono text-[#4A3E3E] font-bold">{branches.length}</strong>
+                      </div>
+                      <div className="bg-stone-50/50 p-2 rounded-xl border border-stone-200/50 text-center">
+                        <span className="text-[10px] text-gray-500 block">{isVi ? 'Nhân viên' : 'Staff'}</span>
+                        <strong className="text-base font-mono text-[#4A3E3E] font-bold">{staff.length}</strong>
+                      </div>
+                      <div className="bg-stone-50/50 p-2 rounded-xl border border-stone-200/50 text-center">
+                        <span className="text-[10px] text-gray-500 block">{isVi ? 'Nguyên liệu' : 'Ingredients'}</span>
+                        <strong className="text-base font-mono text-[#4A3E3E] font-bold">{flavors.length + toppings.length + accompaniments.length}</strong>
+                      </div>
+                      <div className="bg-stone-50/50 p-2 rounded-xl border border-stone-200/50 text-center">
+                        <span className="text-[10px] text-gray-500 block">{isVi ? 'Hóa đơn bán' : 'Orders'}</span>
+                        <strong className="text-base font-mono text-[#4A3E3E] font-bold">{orders.length}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={exportLocalBackup}
+                      className="flex-1 bg-emerald-700 hover:bg-emerald-850 text-white text-xs font-bold py-3 px-4 rounded-xl transition cursor-pointer select-none text-center flex items-center justify-center gap-1.5 shadow-sm"
+                    >
+                      📥 {isVi ? "Tải File backup cơ sở dữ liệu (.json)" : "Export Database JSON"}
+                    </button>
+                    <label className="flex-1 bg-[#4D3E3E] hover:bg-[#3D2E2E] text-white text-xs font-bold py-3 px-4 rounded-xl transition cursor-pointer select-none text-center flex items-center justify-center gap-1.5 shadow-sm">
+                      📤 {isVi ? "Khôi phục dữ liệu từ File (.json)" : "Restore from backup JSON"}
+                      <input
+                        type="file"
+                        accept=".json"
+                        onChange={handleImportBackup}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-3xl border border-amber-900/5 shadow-sm text-xs leading-relaxed space-y-4 text-stone-700">
+                  <h4 className="font-bold text-sm text-[#4A3E3E] border-b pb-2">💡 {isVi ? 'Lưu ý vận hành an toàn offline-first' : 'Durable offline operations notice'}</h4>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li>
+                      <strong>{isVi ? 'Vấn đề tắt nguồn đột ngột hoặc tắt trình duyệt:' : 'Power cuts or browser termination:'}</strong>
+                      {isVi 
+                        ? ' Trình duyệt tự động ghim dữ liệu LocalStorage vào ổ cứng (SSD/HDD) ngay khi có thay đổi trạng thái bán hàng/nhập kho. Nếu mất điện đột ngột hoặc đóng tab trình duyệt, toàn bộ số liệu của bạn vẫn được giữ nguyên an toàn 100%.'
+                        : ' Browsers automatically write LocalStorage entries directly to physical disk. Unexpected power downs or page tabs closed will not result in any data losses.'}
+                    </li>
+                    <li>
+                      <strong>{isVi ? 'Thao tác dọn dẹp bộ nhớ (Clear Cache & Site data):' : 'Clear Browser Cache & Data:'}</strong>
+                      {isVi 
+                        ? ' Khi người dùng xóa thủ công Cookie và Toàn bộ giữ liệu trang web trên trình duyệt, bộ nhớ LocalStorage có thể bị xóa hoàn toàn. Do đó, quản trị viên nên tải file sao lưu dự phòng (.json) về thiết bị cá nhân hoặc lưu trữ đám mây mỗi ngày để phòng tránh rủi ro.'
+                        : ' Clearing all local browser caches could erase your local database. Backup files should be generated daily into secondary folders.'}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            )}
 
             {loyaltySubTab === 'zalo' && (
               <div className="space-y-8">
@@ -2788,6 +2985,9 @@ export default function App() {
             staff={staff}
             vouchers={vouchers}
             orders={orders}
+            flavors={flavors}
+            toppings={toppings}
+            accompaniments={accompaniments}
             onAddBranch={handleAddBranchAction}
             onDeleteBranch={handleDeleteBranchAction}
             onUpdateBranch={handleUpdateBranchAction}
@@ -2797,6 +2997,15 @@ export default function App() {
             onAddVoucher={handleAddVoucherAction}
             onUpdateVoucher={handleUpdateVoucherAction}
             onDeleteVoucher={handleDeleteVoucherAction}
+            onAddFlavor={handleAddFlavorAction}
+            onUpdateFlavor={handleUpdateFlavorAction}
+            onDeleteFlavor={handleDeleteFlavorAction}
+            onAddTopping={handleAddToppingAction}
+            onUpdateTopping={handleUpdateToppingAction}
+            onDeleteTopping={handleDeleteToppingAction}
+            onAddAccompaniment={handleAddAccompanimentAction}
+            onUpdateAccompaniment={handleUpdateAccompanimentAction}
+            onDeleteAccompaniment={handleDeleteAccompanimentAction}
           />
         )}
 

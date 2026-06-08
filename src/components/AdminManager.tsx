@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Branch, Staff, Voucher, Language, Order } from '../types';
+import { Branch, Staff, Voucher, Language, Order, Flavor, Topping, Accompaniment } from '../types';
 import { LOCALES } from '../locales';
 
 interface AdminManagerProps {
@@ -22,6 +22,19 @@ interface AdminManagerProps {
   onAddVoucher: (voucher: Voucher) => void;
   onUpdateVoucher: (voucher: Voucher) => void;
   onDeleteVoucher: (code: string) => void;
+  // NEW PROPS FOR MENU & MATERIALS MANAGEMENT
+  flavors: Flavor[];
+  toppings: Topping[];
+  accompaniments: Accompaniment[];
+  onAddFlavor: (item: Omit<Flavor, 'id'>) => void;
+  onUpdateFlavor: (item: Flavor) => void;
+  onDeleteFlavor: (id: string) => void;
+  onAddTopping: (item: Omit<Topping, 'id'>) => void;
+  onUpdateTopping: (item: Topping) => void;
+  onDeleteTopping: (id: string) => void;
+  onAddAccompaniment: (item: Omit<Accompaniment, 'id'>) => void;
+  onUpdateAccompaniment: (item: Accompaniment) => void;
+  onDeleteAccompaniment: (id: string) => void;
 }
 
 export const AdminManager: React.FC<AdminManagerProps> = ({
@@ -38,7 +51,19 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
   onUpdateStaff,
   onAddVoucher,
   onUpdateVoucher,
-  onDeleteVoucher
+  onDeleteVoucher,
+  flavors,
+  toppings,
+  accompaniments,
+  onAddFlavor,
+  onUpdateFlavor,
+  onDeleteFlavor,
+  onAddTopping,
+  onUpdateTopping,
+  onDeleteTopping,
+  onAddAccompaniment,
+  onUpdateAccompaniment,
+  onDeleteAccompaniment
 }) => {
   const isVi = lang === 'vi';
   const t = LOCALES[lang];
@@ -50,7 +75,22 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
   const todayStr = `${yyyy}-${mm}-${dd}`;
 
   // Subtabs within admin manager console
-  const [activeSubTab, setActiveSubTab] = useState<'branches' | 'staff' | 'vouchers'>('branches');
+  const [activeSubTab, setActiveSubTab] = useState<'branches' | 'staff' | 'vouchers' | 'menu-items'>('branches');
+
+  // Menu items & raw materials category & form states
+  const [itemCategory, setItemCategory] = useState<'flavor' | 'topping' | 'accompaniment'>('flavor');
+  const [editingItem, setEditingItem] = useState<{ id: string; type: 'flavor' | 'topping' | 'accompaniment' } | null>(null);
+
+  const [itemNameVi, setItemNameVi] = useState('');
+  const [itemNameEn, setItemNameEn] = useState('');
+  const [itemPrice, setItemPrice] = useState<number>(0);
+  const [itemStock, setItemStock] = useState<number>(10000);
+  const [itemCostPerKg, setItemCostPerKg] = useState<number>(120000);
+  const [itemColor, setItemColor] = useState('#FFAEBC');
+  const [itemIcon, setItemIcon] = useState('creamy');
+  const [itemDescVi, setItemDescVi] = useState('');
+  const [itemDescEn, setItemDescEn] = useState('');
+  const [itemDisabled, setItemDisabled] = useState<boolean>(false);
 
   // Voucher custom sub-tabs & usage tracker
   const [voucherSubTab, setVoucherSubTab] = useState<'valid' | 'invalid'>('valid');
@@ -330,6 +370,118 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
     }
   };
 
+  const startEditItemObj = (type: 'flavor' | 'topping' | 'accompaniment', item: any) => {
+    setEditingItem({ id: item.id, type });
+    setItemCategory(type);
+    setItemNameVi(item.nameVi);
+    setItemNameEn(item.nameEn);
+    setItemDisabled(item.disabled || false);
+    if (type === 'flavor') {
+      setItemStock(item.stockGrams);
+      setItemCostPerKg(item.costPerKg);
+      setItemColor(item.color || '#FFAEBC');
+      setItemIcon(item.iconType || 'creamy');
+      setItemDescVi(item.descVi || '');
+      setItemDescEn(item.descEn || '');
+    } else {
+      setItemPrice(item.price || 0);
+      setItemStock(item.stockQuantity || 0);
+    }
+  };
+
+  const cancelEditItemObj = () => {
+    setEditingItem(null);
+    setItemNameVi('');
+    setItemNameEn('');
+    setItemPrice(0);
+    setItemStock(10000);
+    setItemCostPerKg(120000);
+    setItemColor('#FFAEBC');
+    setItemIcon('creamy');
+    setItemDescVi('');
+    setItemDescEn('');
+    setItemDisabled(false);
+  };
+
+  const handleItemSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!itemNameVi.trim() || !itemNameEn.trim()) return;
+
+    if (editingItem) {
+      // Editing Mode
+      if (editingItem.type === 'flavor') {
+        const item: Flavor = {
+          id: editingItem.id,
+          nameVi: itemNameVi,
+          nameEn: itemNameEn,
+          color: itemColor,
+          iconType: itemIcon,
+          descVi: itemDescVi,
+          descEn: itemDescEn,
+          stockGrams: Number(itemStock),
+          costPerKg: Number(itemCostPerKg),
+          disabled: itemDisabled,
+        };
+        onUpdateFlavor(item);
+      } else if (editingItem.type === 'topping') {
+        const item: Topping = {
+          id: editingItem.id,
+          nameVi: itemNameVi,
+          nameEn: itemNameEn,
+          price: Number(itemPrice),
+          stockQuantity: Number(itemStock),
+          disabled: itemDisabled,
+        };
+        onUpdateTopping(item);
+      } else if (editingItem.type === 'accompaniment') {
+        const item: Accompaniment = {
+          id: editingItem.id,
+          nameVi: itemNameVi,
+          nameEn: itemNameEn,
+          price: Number(itemPrice),
+          stockQuantity: Number(itemStock),
+          disabled: itemDisabled,
+        };
+        onUpdateAccompaniment(item);
+      }
+    } else {
+      // Adding Mode
+      if (itemCategory === 'flavor') {
+        const item: Omit<Flavor, 'id'> = {
+          nameVi: itemNameVi,
+          nameEn: itemNameEn,
+          color: itemColor,
+          iconType: itemIcon,
+          descVi: itemDescVi,
+          descEn: itemDescEn,
+          stockGrams: Number(itemStock),
+          costPerKg: Number(itemCostPerKg),
+          disabled: itemDisabled,
+        };
+        onAddFlavor(item);
+      } else if (itemCategory === 'topping') {
+        const item: Omit<Topping, 'id'> = {
+          nameVi: itemNameVi,
+          nameEn: itemNameEn,
+          price: Number(itemPrice),
+          stockQuantity: Number(itemStock),
+          disabled: itemDisabled,
+        };
+        onAddTopping(item);
+      } else if (itemCategory === 'accompaniment') {
+        const item: Omit<Accompaniment, 'id'> = {
+          nameVi: itemNameVi,
+          nameEn: itemNameEn,
+          price: Number(itemPrice),
+          stockQuantity: Number(itemStock),
+          disabled: itemDisabled,
+        };
+        onAddAccompaniment(item);
+      }
+    }
+    cancelEditItemObj();
+  };
+
   return (
     <div className="space-y-6 font-sans text-stone-800">
       
@@ -339,7 +491,7 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
       </div>
 
       {/* Sub tabs view switcher */}
-      <div className="flex bg-amber-50/40 p-1.5 rounded-2xl border border-amber-900/10 max-w-lg shadow-xs">
+      <div className="flex bg-amber-50/40 p-1.5 rounded-2xl border border-amber-900/10 max-w-2xl shadow-xs">
         <button
           onClick={() => setActiveSubTab('branches')}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl font-bold text-xs select-none cursor-pointer transition ${
@@ -369,6 +521,16 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
           }`}
         >
           🎫 {isVi ? 'Voucher Khuyến Mãi' : 'Promotions & Vouchers'}
+        </button>
+        <button
+          onClick={() => { setActiveSubTab('menu-items'); cancelEditItemObj(); }}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl font-bold text-xs select-none cursor-pointer transition ${
+            activeSubTab === 'menu-items'
+              ? 'bg-[#4A3E3E] text-white shadow-xs'
+              : 'text-stone-500 hover:text-stone-800'
+          }`}
+        >
+          📋 {isVi ? 'Menu & Nguyên Liệu' : 'Menu & Materials'}
         </button>
       </div>
 
@@ -1100,6 +1262,404 @@ export const AdminManager: React.FC<AdminManagerProps> = ({
                   className="flex-2 bg-[#4A3E3E] hover:bg-amber-950 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow cursor-pointer transition text-center"
                 >
                   {editingVoucher ? (isVi ? '💾 Cập nhật chiến dịch' : '💾 Update Coupon') : `+ ${isVi ? 'Kích hoạt chiến dịch' : 'Deploy Coupon'}`}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {activeSubTab === 'menu-items' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start text-stone-800">
+          {/* List of items (left 7 cols) */}
+          <div className="lg:col-span-7 bg-white p-6 rounded-3xl border border-amber-900/5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b pb-2 flex-wrap gap-2">
+              <h4 className="text-sm font-bold text-[#4A3E3E] flex items-center gap-2">
+                <span>📋 {isVi ? 'Danh mục Nguyên Liệu & Menu Món Bán' : 'Raw Stock & Menu Registry'}</span>
+              </h4>
+
+              {/* Internal Category switcher */}
+              <div className="flex bg-stone-100 p-1 rounded-xl border border-stone-200 gap-1 text-[11px] font-bold">
+                <button
+                  type="button"
+                  onClick={() => { setItemCategory('flavor'); cancelEditItemObj(); }}
+                  className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${itemCategory === 'flavor' ? 'bg-white text-[#4A3E3E] shadow-xs' : 'text-stone-500 hover:text-stone-800'}`}
+                >
+                  🍦 {isVi ? 'Vị kem' : 'Flavors'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setItemCategory('topping'); cancelEditItemObj(); }}
+                  className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${itemCategory === 'topping' ? 'bg-white text-[#4A3E3E] shadow-xs' : 'text-stone-500 hover:text-stone-800'}`}
+                >
+                  🍪 {isVi ? 'Topping' : 'Toppings'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setItemCategory('accompaniment'); cancelEditItemObj(); }}
+                  className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${itemCategory === 'accompaniment' ? 'bg-white text-[#4A3E3E] shadow-xs' : 'text-stone-500 hover:text-stone-800'}`}
+                >
+                   waffle {isVi ? 'Đồ kèm' : 'Accompaniments'}
+                </button>
+              </div>
+            </div>
+
+            {/* Main Listing elements */}
+            <div className="space-y-3 max-h-[550px] overflow-y-auto pr-1">
+              {itemCategory === 'flavor' && flavors.map(f => (
+                <div key={f.id} className={`p-4 rounded-2xl border transition flex items-center gap-3 ${f.disabled ? 'bg-stone-50 border-stone-150 opacity-60' : 'bg-amber-50/10 border-amber-900/5 hover:bg-amber-50/20'}`}>
+                  {/* Decorative Color orb */}
+                  <div className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center border font-mono font-bold" style={{ backgroundColor: f.color }} />
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <strong className="text-stone-850 text-xs sm:text-sm font-bold truncate">{isVi ? f.nameVi : f.nameEn}</strong>
+                      <span className="text-[9px] bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded font-mono font-bold">{f.id}</span>
+                      {f.disabled && (
+                        <span className="bg-stone-200 text-stone-600 text-[8.5px] px-1.5 py-0.2 rounded font-mono font-bold uppercase">{isVi ? 'Tạm dừng hđ' : 'Disabled'}</span>
+                      )}
+                    </div>
+                    <span className="text-[10.5px] text-gray-500 block truncate">{isVi ? f.descVi : f.descEn}</span>
+                    <div className="flex items-center gap-3 mt-1.5 pt-1.5 border-t border-dashed border-stone-200/50 text-[10.5px] text-stone-500 font-medium font-mono">
+                      <span><strong>{isVi ? 'Giá vốn:' : 'Base cost:'}</strong> {f.costPerKg.toLocaleString('vi-VN')}đ/kg</span>
+                      <span><strong>{isVi ? 'Cơ số tồn:' : 'Default stock:'}</strong> {f.stockGrams.toLocaleString()}g</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 text-right shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => startEditItemObj('flavor', f)}
+                      className="text-amber-850 font-bold hover:text-amber-950 hover:bg-amber-150/40 px-2.5 py-1 rounded-lg text-xs cursor-pointer transition border border-amber-800/10"
+                    >
+                      ✏️ {isVi ? 'Sửa' : 'Edit'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextItem = { ...f, disabled: !f.disabled };
+                        onUpdateFlavor(nextItem);
+                      }}
+                      className={`font-semibold px-2.5 py-1 rounded-lg text-xs cursor-pointer transition border ${f.disabled ? 'text-emerald-600 border-emerald-500/15 hover:bg-emerald-50' : 'text-stone-500 border-stone-500/15 hover:bg-stone-100'}`}
+                    >
+                      {f.disabled ? (isVi ? '🟢 Mở' : '🟢 Enable') : (isVi ? '🚫 Khóa' : '🚫 Disable')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm(isVi ? `Xóa vĩnh viễn vị kem này? Lịch sử giao dịch định nghĩa vị này có thể mất tên.` : `Delete flavor master entity permanently?`)) {
+                          onDeleteFlavor(f.id);
+                        }
+                      }}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5 py-1 rounded-lg text-xs cursor-pointer transition"
+                    >
+                      🗑️ {isVi ? 'Xóa' : 'Delete'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {itemCategory === 'topping' && toppings.map(t => (
+                <div key={t.id} className={`p-4 rounded-2xl border transition flex items-center gap-3 ${t.disabled ? 'bg-stone-50 border-stone-150 opacity-60' : 'bg-amber-50/10 border-amber-900/5 hover:bg-amber-50/20'}`}>
+                  {/* Icon represent */}
+                  <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-800 font-bold flex items-center justify-center shrink-0 border border-orange-200">🍪</div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <strong className="text-stone-850 text-xs sm:text-sm font-bold truncate">{isVi ? t.nameVi : t.nameEn}</strong>
+                      <span className="text-[9px] bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded font-mono font-bold">{t.id}</span>
+                      {t.disabled && (
+                        <span className="bg-stone-200 text-stone-600 text-[8.5px] px-1.5 py-0.2 rounded font-mono font-bold uppercase">{isVi ? 'Tạm dừnghđ' : 'Disabled'}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 mt-1.5 pt-1.5 text-[10.5px] text-stone-500 font-medium font-mono">
+                      <span><strong>{isVi ? 'Giá bán lẻ:' : 'Retail price:'}</strong> <span className="text-rose-700 font-bold">{t.price.toLocaleString('vi-VN')}đ</span></span>
+                      <span><strong>{isVi ? 'Cơ số tồn:' : 'Default stock:'}</strong> {t.stockQuantity.toLocaleString()} pcs</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 text-right shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => startEditItemObj('topping', t)}
+                      className="text-amber-850 font-bold hover:text-amber-950 hover:bg-amber-150/40 px-2.5 py-1 rounded-lg text-xs cursor-pointer transition border border-amber-850/10"
+                    >
+                      ✏️ {isVi ? 'Sửa' : 'Edit'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextItem = { ...t, disabled: !t.disabled };
+                        onUpdateTopping(nextItem);
+                      }}
+                      className={`font-semibold px-2.5 py-1 rounded-lg text-xs cursor-pointer transition border ${t.disabled ? 'text-emerald-600 border-emerald-500/15 hover:bg-emerald-50' : 'text-stone-500 border-stone-500/15 hover:bg-stone-100'}`}
+                    >
+                      {t.disabled ? (isVi ? '🟢 Mở' : '🟢 Enable') : (isVi ? '🚫 Khóa' : '🚫 Disable')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm(isVi ? `Xóa vĩnh viễn Topping này?` : `Delete topping master entity permanently?`)) {
+                          onDeleteTopping(t.id);
+                        }
+                      }}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5 py-1 rounded-lg text-xs cursor-pointer transition"
+                    >
+                      🗑️ {isVi ? 'Xóa' : 'Delete'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {itemCategory === 'accompaniment' && accompaniments.map(a => (
+                <div key={a.id} className={`p-4 rounded-2xl border transition flex items-center gap-3 ${a.disabled ? 'bg-stone-50 border-stone-150 opacity-60' : 'bg-amber-50/10 border-amber-900/5 hover:bg-amber-50/20'}`}>
+                  {/* Icon represent */}
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 font-bold flex items-center justify-center shrink-0 border border-amber-200">🧇</div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <strong className="text-stone-850 text-xs sm:text-sm font-bold truncate">{isVi ? a.nameVi : a.nameEn}</strong>
+                      <span className="text-[9px] bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded font-mono font-bold">{a.id}</span>
+                      {a.disabled && (
+                        <span className="bg-stone-200 text-stone-600 text-[8.5px] px-1.5 py-0.2 rounded font-mono font-bold uppercase">{isVi ? 'Tạm dừnghđ' : 'Disabled'}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 mt-1.5 pt-1.5 text-[10.5px] text-stone-500 font-medium font-mono">
+                      <span><strong>{isVi ? 'Giá bán lẻ:' : 'Retail price:'}</strong> <span className="text-rose-700 font-bold">{a.price.toLocaleString('vi-VN')}đ</span></span>
+                      <span><strong>{isVi ? 'Cơ số tồn:' : 'Default stock:'}</strong> {a.stockQuantity.toLocaleString()} pcs</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 text-right shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => startEditItemObj('accompaniment', a)}
+                      className="text-amber-850 font-bold hover:text-amber-950 hover:bg-amber-150/40 px-2.5 py-1 rounded-lg text-xs cursor-pointer transition border border-amber-850/10"
+                    >
+                      ✏️ {isVi ? 'Sửa' : 'Edit'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextItem = { ...a, disabled: !a.disabled };
+                        onUpdateAccompaniment(nextItem);
+                      }}
+                      className={`font-semibold px-2.5 py-1 rounded-lg text-xs cursor-pointer transition border ${a.disabled ? 'text-emerald-600 border-emerald-500/15 hover:bg-emerald-50' : 'text-stone-500 border-stone-500/15 hover:bg-stone-100'}`}
+                    >
+                      {a.disabled ? (isVi ? '🟢 Mở' : '🟢 Enable') : (isVi ? '🚫 Khóa' : '🚫 Disable')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm(isVi ? `Xóa vĩnh viễn món ăn kèm này?` : `Delete accompaniment entity?`)) {
+                          onDeleteAccompaniment(a.id);
+                        }
+                      }}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-55 px-2.5 py-1 rounded-lg text-xs cursor-pointer transition"
+                    >
+                      🗑️ {isVi ? 'Xóa' : 'Delete'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Form details input (right 5 cols) */}
+          <div className="lg:col-span-12 xl:col-span-5 bg-white p-6 rounded-3xl border border-amber-900/5 shadow-sm space-y-4">
+            <h4 className="text-sm font-bold text-[#4A3E3E] flex items-center justify-between border-b pb-2">
+              <span>{editingItem ? `✏️ ${isVi ? 'Cập nhật món & Nguyên liệu' : 'Update Menu Item'}` : `✨ ${isVi ? 'Thêm mới vào danh mục' : 'Add Item'}`}</span>
+              {editingItem && (
+                <button
+                  type="button"
+                  onClick={cancelEditItemObj}
+                  className="text-xs text-stone-400 hover:text-stone-700 font-medium underline"
+                >
+                  {isVi ? 'Hủy bản sửa' : 'Cancel Edit'}
+                </button>
+              )}
+            </h4>
+
+            <form onSubmit={handleItemSubmit} className="space-y-4">
+              <div className="space-y-3">
+                {/* Visual Segment Type indicator on creation */}
+                {!editingItem && (
+                  <div>
+                    <span className="block text-[10.5px] font-bold uppercase text-stone-500 mb-1">{isVi ? 'Thiết lập cho nhóm' : 'Setup for group'}</span>
+                    <div className="grid grid-cols-3 gap-2 p-1 bg-stone-100 rounded-xl border">
+                      <span className={`text-center py-1 text-xs font-bold rounded-lg cursor-pointer ${itemCategory === 'flavor' ? 'bg-white shadow text-[#4A3E3E]' : 'text-stone-500'}`} onClick={() => setItemCategory('flavor')}>Vị kem</span>
+                      <span className={`text-center py-1 text-xs font-bold rounded-lg cursor-pointer ${itemCategory === 'topping' ? 'bg-white shadow text-[#4A3E3E]' : 'text-stone-500'}`} onClick={() => setItemCategory('topping')}>Toppings</span>
+                      <span className={`text-center py-1 text-xs font-bold rounded-lg cursor-pointer ${itemCategory === 'accompaniment' ? 'bg-white shadow text-[#4A3E3E]' : 'text-stone-500'}`} onClick={() => setItemCategory('accompaniment')}>Đồ ăn kèm</span>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-[10.5px] font-bold uppercase text-stone-500 mb-1">{isVi ? 'Tên Tiếng Việt' : 'Name (VI)'}</label>
+                  <input
+                    type="text"
+                    required
+                    value={itemNameVi}
+                    onChange={e => setItemNameVi(e.target.value)}
+                    placeholder={isVi ? 'Tên món Tiếng Việt...' : 'Vietnamese name'}
+                    className="w-full text-xs border rounded-xl p-2.5 bg-[#FDFBF7]/30"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10.5px] font-bold uppercase text-stone-500 mb-1">{isVi ? 'Tên Tiếng Anh' : 'Name (EN)'}</label>
+                  <input
+                    type="text"
+                    required
+                    value={itemNameEn}
+                    onChange={e => setItemNameEn(e.target.value)}
+                    placeholder={isVi ? 'Tên món dịch Tiếng Anh...' : 'English translation name'}
+                    className="w-full text-xs border rounded-xl p-2.5 bg-[#FDFBF7]/30"
+                  />
+                </div>
+
+                {/* Flavor specific elements */}
+                {itemCategory === 'flavor' ? (
+                  <div className="space-y-3 pt-1 border-t border-dashed mt-2 border-stone-200">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase text-stone-400 mb-0.5">{isVi ? 'Mã màu Hex' : 'Orb color color code'}</label>
+                        <div className="flex gap-1.5 items-center">
+                          <input
+                            type="color"
+                            value={itemColor}
+                            onChange={e => setItemColor(e.target.value)}
+                            className="w-8 h-8 rounded shrink-0 border border-stone-200 p-0 overflow-hidden cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            required
+                            value={itemColor}
+                            onChange={e => setItemColor(e.target.value)}
+                            className="w-full text-xs border rounded-lg p-1.5 bg-[#FDFBF7]/30 text-center uppercase font-mono"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase text-stone-400 mb-0.5">{isVi ? 'Giá vốn (/ kg)' : 'Cost per Kg'}</label>
+                        <input
+                          type="number"
+                          required
+                          value={itemCostPerKg === 0 ? '' : itemCostPerKg}
+                          onChange={e => setItemCostPerKg(Math.max(0, Number(e.target.value)))}
+                          placeholder="120,000"
+                          className="w-full text-xs border rounded-xl p-2 bg-[#FDFBF7]/30 font-medium font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase text-stone-400 mb-0.5">{isVi ? 'Mẫu Icon vị' : 'Flavor icon selector'}</label>
+                        <select
+                          value={itemIcon}
+                          onChange={e => setItemIcon(e.target.value)}
+                          className="w-full text-xs border rounded-xl p-2 bg-[#FDFBF7]/30 font-bold"
+                        >
+                          <option value="creamy">🍨 Creamy Cone</option>
+                          <option value="fruity">🍓 Sweet Berry</option>
+                          <option value="chocolate">🍫 Cocoa Choco</option>
+                          <option value="matcha">🍵 Royal Green Matcha</option>
+                          <option value="nuts">🥜 Peanut Butter</option>
+                          <option value="mint">🌿 Cool Ice Mint</option>
+                          <option value="coconut">🥥 Fresh Coconut</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase text-stone-400 mb-0.5">{isVi ? 'Cơ số tồn kho (g)' : 'Starting stock weight (g)'}</label>
+                        <input
+                          type="number"
+                          required
+                          value={itemStock === 0 ? '' : itemStock}
+                          onChange={e => setItemStock(Math.max(0, Number(e.target.value)))}
+                          placeholder="10000"
+                          className="w-full text-xs border rounded-xl p-2 bg-[#FDFBF7]/30 font-medium font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10.5px] font-bold uppercase text-stone-500 mb-1">{isVi ? 'Mô tả vị (Vi)' : 'Vibe description (Vi)'}</label>
+                      <input
+                        type="text"
+                        value={itemDescVi}
+                        onChange={e => setItemDescVi(e.target.value)}
+                        placeholder={isVi ? 'Kem béo thơm ngon ngọt bùi...' : 'Vietnamese descriptions'}
+                        className="w-full text-xs border rounded-xl p-2 bg-[#FDFBF7]/30"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10.5px] font-bold uppercase text-stone-500 mb-1">{isVi ? 'Mô tả vị (En)' : 'Vibe description (En)'}</label>
+                      <input
+                        type="text"
+                        value={itemDescEn}
+                        onChange={e => setItemDescEn(e.target.value)}
+                        placeholder="Creamy cocoa delicious rich mouthful..."
+                        className="w-full text-xs border rounded-xl p-2 bg-[#FDFBF7]/30"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2 pt-1 border-t border-dashed mt-2 border-stone-200">
+                    <div>
+                      <label className="block text-[10.5px] font-bold uppercase text-[#4A3E3E] mb-1">{isVi ? 'Đơn giá bán lẻ' : 'Retail Price (đ)'}</label>
+                      <input
+                        type="number"
+                        required
+                        value={itemPrice === 0 ? '' : itemPrice}
+                        onChange={e => setItemPrice(Math.max(0, Number(e.target.value)))}
+                        placeholder="5,000"
+                        className="w-full text-xs border rounded-xl p-2.5 bg-[#FDFBF7]/30 font-bold font-mono text-[#4A3E3E]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10.5px] font-bold uppercase text-[#4A3E3E] mb-1">{isVi ? 'Tồn kho ban đầu' : 'Initial Stock Quantity'}</label>
+                      <input
+                        type="number"
+                        required
+                        value={itemStock === 0 ? '' : itemStock}
+                        onChange={e => setItemStock(Math.max(0, Number(e.target.value)))}
+                        placeholder="100"
+                        className="w-full text-xs border rounded-xl p-2.5 bg-[#FDFBF7]/30 font-bold font-mono text-[#4A3E3E]"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Status Toggles */}
+                <div className="pt-2">
+                  <label className="flex items-center gap-2 text-xs font-bold text-[#4A3E3E] cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={!itemDisabled}
+                      onChange={(e) => setItemDisabled(!e.target.checked)}
+                      className="rounded text-[#4A3E3E] focus:ring-amber-500 h-3.5 w-3.5"
+                    />
+                    🟢 {isVi ? 'Có sẵn (Kích hoạt phục vụ tại quầy)' : 'On sale (Enable checkout at stations)'}
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                {editingItem && (
+                  <button
+                    type="button"
+                    onClick={cancelEditItemObj}
+                    className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs py-2.5 px-4 rounded-xl cursor-pointer transition text-center"
+                  >
+                    {isVi ? 'Hủy' : 'Cancel'}
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className="flex-2 bg-[#4A3E3E] hover:bg-amber-950 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow cursor-pointer transition text-center"
+                >
+                  {editingItem ? (isVi ? '💾 Cập nhật danh mục' : '💾 Update Register entry') : `+ ${isVi ? 'Thêm mới danh mục' : 'Add Item Registry'}`}
                 </button>
               </div>
             </form>

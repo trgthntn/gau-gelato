@@ -44,6 +44,7 @@ export interface Flavor {
   descEn: string;
   stockGrams: number;
   costPerKg: number; // For accounting
+  disabled?: boolean;
 }
 
 export interface Topping {
@@ -52,6 +53,7 @@ export interface Topping {
   nameEn: string;
   price: number;
   stockQuantity: number;
+  disabled?: boolean;
 }
 
 export interface Accompaniment {
@@ -60,6 +62,7 @@ export interface Accompaniment {
   nameEn: string;
   price: number;
   stockQuantity: number;
+  disabled?: boolean;
 }
 
 export interface Voucher {

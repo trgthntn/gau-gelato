@@ -28,7 +28,7 @@ export const LOCALES: Record<Language, Record<string, string>> = {
     // Navigation Tabs
     tabSales: 'Quầy Bán Hàng',
     tabInventory: 'Kho Nguyên Liệu',
-    tabLoyalty: 'Zalo & Android App',
+    tabLoyalty: 'Cấu hình hệ thống',
     tabInvoices: 'Hóa Đơn VAT',
     tabCosts: 'Sổ Sách Chi Phí',
     tabAdmin: 'Quản Trị Chuỗi',
@@ -207,7 +207,7 @@ export const LOCALES: Record<Language, Record<string, string>> = {
     // Navigation Tabs
     tabSales: 'POS Checkout',
     tabInventory: 'Raw Stock',
-    tabLoyalty: 'Zalo & Android',
+    tabLoyalty: 'System Config',
     tabInvoices: 'VAT E-Invoices',
     tabCosts: 'Operational Expenses',
     tabAdmin: 'Chain Control',
